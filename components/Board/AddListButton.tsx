@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { listsApi } from '@/lib/api';
+import type { List } from '@/lib/types';
 
 interface Props {
   boardId: string;
-  onCreated: (list: unknown) => void;
+  onCreated: (list: List) => void;
 }
 
 export default function AddListButton({ boardId, onCreated }: Props) {
@@ -20,7 +21,7 @@ export default function AddListButton({ boardId, onCreated }: Props) {
     setLoading(true);
     try {
       const res = await listsApi.create(boardId, { name: name.trim() });
-      onCreated((res as any).list);
+      onCreated((res as { list: List }).list);
       setName('');
       setOpen(false);
     } finally {
