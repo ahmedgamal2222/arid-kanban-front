@@ -65,6 +65,14 @@ export const workspacesApi = {
     apiFetch<{ workspace: Workspace }>('/workspaces', { method: 'POST', body: JSON.stringify(data) }),
   fetch: (id: string) => apiFetch<{ workspace: Workspace }>(`/workspaces/${id}`),
   boards: (id: string) => apiFetch<{ boards: Board[] }>(`/workspaces/${id}/boards`),
+  update: (id: string, data: { name?: string; description?: string }) =>
+    apiFetch<{ workspace: Workspace }>(`/workspaces/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id: string) =>
+    apiFetch<{ success: boolean }>(`/workspaces/${id}`, { method: 'DELETE' }),
+  addMember: (id: string, aridId: string, role = 'member') =>
+    apiFetch<{ success: boolean }>(`/workspaces/${id}/members`, { method: 'POST', body: JSON.stringify({ arid_researcher_id: aridId, role }) }),
+  removeMember: (id: string, aridId: string) =>
+    apiFetch<{ success: boolean }>(`/workspaces/${id}/members/${aridId}`, { method: 'DELETE' }),
 };
 
 // ── Boards ──
@@ -73,7 +81,7 @@ export const boardsApi = {
   create: (data: { workspace_id: string; name: string; visibility?: string; template_id?: string }) =>
     apiFetch<{ board: BoardFull }>('/boards', { method: 'POST', body: JSON.stringify(data) }),
   update: (id: string, data: Record<string, unknown>) =>
-    apiFetch<{ board: BoardFull }>(`/boards/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    apiFetch<{ board: BoardFull }>(`/boards/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   delete: (id: string) =>
     apiFetch<{ success: boolean }>(`/boards/${id}`, { method: 'DELETE' }),
   search: (id: string, q: string) =>
@@ -84,6 +92,14 @@ export const boardsApi = {
     apiFetch<unknown>(`/boards/${id}/timeline`),
   exportUrl: (id: string, format: 'json' | 'csv') =>
     `${API}/boards/${id}/export?format=${format}`,
+  createLabel: (boardId: string, data: { name?: string; color: string }) =>
+    apiFetch<{ label: unknown }>(`/boards/${boardId}/labels`, { method: 'POST', body: JSON.stringify(data) }),
+  deleteLabel: (boardId: string, labelId: string) =>
+    apiFetch<{ success: boolean }>(`/boards/${boardId}/labels/${labelId}`, { method: 'DELETE' }),
+  addMember: (boardId: string, aridId: string, role = 'member') =>
+    apiFetch<{ success: boolean }>(`/boards/${boardId}/members`, { method: 'POST', body: JSON.stringify({ arid_researcher_id: aridId, role }) }),
+  removeMember: (boardId: string, aridId: string) =>
+    apiFetch<{ success: boolean }>(`/boards/${boardId}/members/${aridId}`, { method: 'DELETE' }),
 };
 
 // ── Lists ──
@@ -91,7 +107,9 @@ export const listsApi = {
   create: (boardId: string, data: { name: string; position?: number }) =>
     apiFetch<{ list: unknown }>(`/boards/${boardId}/lists`, { method: 'POST', body: JSON.stringify(data) }),
   update: (id: string, data: { name?: string; position?: number }) =>
-    apiFetch<{ list: unknown }>(`/lists/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    apiFetch<{ list: unknown }>(`/lists/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id: string) =>
+    apiFetch<{ success: boolean }>(`/lists/${id}`, { method: 'DELETE' }),
 };
 
 // ── Cards ──

@@ -152,7 +152,13 @@ export default function BoardCanvas({ board }: Props) {
     >
       <div className="board-canvas">
         {lists.map(list => (
-          <ListColumn key={list.id} list={list} boardId={board.id} />
+          <ListColumn
+            key={list.id}
+            list={list}
+            boardId={board.id}
+            onDelete={listId => setLists(prev => prev.filter(l => l.id !== listId))}
+            onRename={(listId, name) => setLists(prev => prev.map(l => l.id === listId ? { ...l, name } : l))}
+          />
         ))}
         <AddListButton boardId={board.id} onCreated={newList => setLists(prev => [...prev, { ...newList, cards: [] } as ListFull])} />
       </div>
