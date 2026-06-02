@@ -1,7 +1,5 @@
 export const dynamic = 'force-static';
 
-const AUTH_URL = process.env.NEXT_PUBLIC_ARID_AUTH_URL ?? 'https://arid.sa';
-
 export default function HomePage() {
   return (
     <main
@@ -38,7 +36,7 @@ export default function HomePage() {
             <span className="font-bold text-lg tracking-tight">ARID Kanban</span>
           </div>
           <a
-            href={`${AUTH_URL}/login`}
+            href="login"
             className="text-sm text-blue-300 hover:text-white transition-colors"
           >
             تسجيل الدخول
@@ -65,7 +63,7 @@ export default function HomePage() {
 
           <div className="flex flex-col sm:flex-row gap-4 items-center">
             <a
-              href={`${AUTH_URL}/login`}
+              href="login"
               className="inline-flex items-center gap-2 bg-gradient-to-l from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold px-8 py-3.5 rounded-xl shadow-lg shadow-blue-900/40 transition-all duration-200 hover:scale-105"
             >
               ابدأ الآن
@@ -74,10 +72,10 @@ export default function HomePage() {
               </svg>
             </a>
             <a
-              href={`${AUTH_URL}/login`}
+              href="register"
               className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 hover:text-white font-medium px-8 py-3.5 rounded-xl transition-all duration-200"
             >
-              تسجيل الدخول
+              إنشاء حساب
             </a>
           </div>
         </section>

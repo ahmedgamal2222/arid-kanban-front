@@ -1,9 +1,18 @@
 import type { BoardFull, CardDetail, Workspace } from './types';
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.arid.sa/kanban/v1';
+const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://arid-kanban-api.info1703.workers.dev/v1';
+// Auth routes are outside /v1 prefix
+const AUTH_BASE = API.replace(/\/v1$/, '');
+
+// ── Session helpers ──
+export const session = {
+  getToken: () => (typeof window !== 'undefined' ? localStorage.getItem('arid_token') : null),
+  setToken: (t: string) => localStorage.setItem('arid_token', t),
+  clear: () => localStorage.removeItem('arid_token'),
+};
 
 async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('arid_token') : null;
+  const token = session.getToken();
 
   const res = await fetch(`${API}${path}`, {
     ...options,
@@ -21,6 +30,33 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
 
   return res.json() as Promise<T>;
 }
+
+// ── Auth ──
+export const authApi = {
+  login: (email: string, password: string) =>
+    fetch(`${AUTH_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    }).then(async (r) => {
+      const data = await r.json() as any;
+      if (!r.ok) throw new Error(data.error ?? `HTTP ${r.status}`);
+      return data as { success: boolean; token: string; user: { id: string; email: string; name: string; role: string } };
+    }),
+
+  register: (email: string, password: string, name: string) =>
+    fetch(`${AUTH_BASE}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, name }),
+    }).then(async (r) => {
+      const data = await r.json() as any;
+      if (!r.ok) throw new Error(data.error ?? `HTTP ${r.status}`);
+      return data as { success: boolean; message: string };
+    }),
+
+  me: () => apiFetch<{ id: string; email: string; name: string; role: string }>('/auth/me'),
+};
 
 // ── Workspaces ──
 export const workspacesApi = {
