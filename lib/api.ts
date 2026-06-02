@@ -1,4 +1,4 @@
-import type { BoardFull, CardDetail, Workspace } from './types';
+import type { BoardFull, CardDetail, Workspace, Board } from './types';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://arid-kanban-api.info1703.workers.dev/v1';
 // Auth routes are outside /v1 prefix
