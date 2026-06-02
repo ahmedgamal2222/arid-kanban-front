@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -52,7 +52,6 @@ export default function CardItem({ card, boardId, listId, isDragOverlay }: Props
           isDragOverlay ? 'rotate-2 shadow-2xl shadow-black/50 scale-[1.03]' : '',
         ].join(' ')}
       >
-        {/* ØºÙ„Ø§Ù Ù…Ù„ÙˆÙ† Ø¹Ù„ÙˆÙŠ */}
         {card.cover_color && (
           <div
             className="h-9 rounded-t-xl w-full"
@@ -61,7 +60,6 @@ export default function CardItem({ card, boardId, listId, isDragOverlay }: Props
         )}
 
         <div className={card.cover_color ? 'px-3 pt-2 pb-3' : 'p-3'}>
-          {/* Ø§Ù„Ù…Ù„ØµÙ‚Ø§Øª */}
           {card.labels.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-2">
               {card.labels.map(label => (
@@ -75,12 +73,10 @@ export default function CardItem({ card, boardId, listId, isDragOverlay }: Props
             </div>
           )}
 
-          {/* Ø§Ù„Ø¹Ù†ÙˆØ§Ù† */}
           <p className="text-[13px] font-medium text-slate-100 leading-snug break-words">
             {card.title}
           </p>
 
-          {/* Ø§Ù„ÙˆØ³ÙˆÙ… Ø§Ù„Ø³ÙÙ„ÙŠØ© */}
           {(card.due_date || card.checklist_progress.total > 0 || card.comments_count > 0 || card.attachments_count > 0 || card.members.length > 0) && (
             <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
               {card.due_date && (
