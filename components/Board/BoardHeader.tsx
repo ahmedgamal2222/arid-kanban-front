@@ -36,7 +36,7 @@ function BoardSettingsPanel({ board, onClose }: { board: BoardFull; onClose: () 
 
   const [name, setName] = useState(board.name);
   const [visibility, setVisibility] = useState(board.visibility ?? 'workspace');
-  const [background, setBackground] = useState((board as any).background ?? BOARD_COLORS[0].value);
+  const [background, setBackground] = useState((board as any).background ?? 'from-blue-600 to-indigo-700');
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
