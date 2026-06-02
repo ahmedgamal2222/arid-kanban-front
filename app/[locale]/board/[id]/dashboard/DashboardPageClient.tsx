@@ -1,14 +1,7 @@
-import DashboardPageClient from './DashboardPageClient';
+'use client';
 
-// Server component — required for generateStaticParams with output: 'export'
-export function generateStaticParams() {
-  return [{ id: '__board__' }];
-}
-
-export default function DashboardPage() {
-  return <DashboardPageClient />;
-}
-
+import { useQuery } from '@tanstack/react-query';
+import { useParams } from 'next/navigation';
 import { boardsApi } from '@/lib/api';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -17,7 +10,7 @@ import {
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
-export default function DashboardPage() {
+export default function DashboardPageClient() {
   const { id } = useParams<{ id: string }>();
 
   const { data, isLoading } = useQuery({
@@ -40,7 +33,6 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* البطاقات بحسب العضو */}
         {stats?.cards_by_member?.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
             <h2 className="text-base font-semibold mb-4 text-gray-700 dark:text-gray-300">البطاقات بحسب الباحث</h2>
@@ -55,7 +47,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* البطاقات بحسب الملصق */}
         {stats?.cards_by_label?.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
             <h2 className="text-base font-semibold mb-4 text-gray-700 dark:text-gray-300">البطاقات بحسب الملصق</h2>
@@ -73,7 +64,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* النشاط اليومي */}
         {stats?.activity_by_day?.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm md:col-span-2">
             <h2 className="text-base font-semibold mb-4 text-gray-700 dark:text-gray-300">النشاط اليومي (30 يوم)</h2>
