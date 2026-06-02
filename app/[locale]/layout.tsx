@@ -26,7 +26,7 @@ export function generateStaticParams() {
 export default async function LocaleLayout({ children, params: { locale } }: Props) {
   if (!locales.includes(locale as any)) notFound();
 
-  const messages = await getMessages();
+  const messages = await getMessages({ locale });
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
 
   return (
