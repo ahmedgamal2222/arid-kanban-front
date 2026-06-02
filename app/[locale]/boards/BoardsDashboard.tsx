@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { workspacesApi, boardsApi, authApi, session } from '@/lib/api';
 import type { Workspace, Board } from '@/lib/types';
@@ -139,6 +139,8 @@ function getBoardColor(id: string) {
 // ── Main component ──
 export default function BoardsDashboard() {
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
   const logout = useLogout();
 
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
@@ -342,7 +344,7 @@ export default function BoardsDashboard() {
                     {boards.map(board => (
                       <Link
                         key={board.id}
-                        href={`board/${board.id}`}
+                        href={`/${locale}/board/${board.id}`}
                         className="group relative rounded-2xl overflow-hidden border border-white/[0.07] hover:border-white/15 transition-all duration-200 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/40"
                       >
                         {/* Color band */}
