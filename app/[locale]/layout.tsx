@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { locales } from '@/i18n/request';
 import Providers from '@/components/Providers';
@@ -12,10 +11,11 @@ interface Props {
 }
 
 export async function generateMetadata({ params: { locale } }: Props): Promise<Metadata> {
-  const t = await getTranslations({ locale, namespace: 'meta' });
+  const messages = (await import(`../../messages/${locale}.json`)).default as Record<string, any>;
+  const meta = messages?.meta ?? {};
   return {
-    title: t('title'),
-    description: t('description'),
+    title: meta.title ?? 'ARID Kanban',
+    description: meta.description ?? '',
   };
 }
 
@@ -26,13 +26,13 @@ export function generateStaticParams() {
 export default async function LocaleLayout({ children, params: { locale } }: Props) {
   if (!locales.includes(locale as any)) notFound();
 
-  const messages = await getMessages({ locale });
+  const messages = (await import(`../../messages/${locale}.json`)).default;
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
 
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>
       <body className="bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 antialiased">
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>
             {children}
           </Providers>
