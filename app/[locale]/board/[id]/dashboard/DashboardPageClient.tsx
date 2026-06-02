@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { boardsApi } from '@/lib/api';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -39,7 +39,8 @@ function LoadingSkeleton() {
 }
 
 export default function DashboardPageClient() {
-  const { id } = useParams<{ id: string }>();
+  const pathname = usePathname();
+  const id = pathname.split('/board/')[1]?.replace(/\/$/, '').split('/')[0] ?? '';
 
   const { data, isLoading } = useQuery({
     queryKey: ['board-dashboard', id],

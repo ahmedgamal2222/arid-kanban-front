@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { boardsApi } from '@/lib/api';
 import BoardCanvas from '@/components/Board/BoardCanvas';
 import BoardHeader from '@/components/Board/BoardHeader';
@@ -38,7 +38,10 @@ function BoardSkeleton() {
 }
 
 export default function BoardPageClient() {
-  const { id } = useParams<{ id: string }>();
+  // useParams() returns '__board__' in static export rewrites —
+  // parse the actual URL instead to get the real board ID
+  const pathname = usePathname();
+  const id = pathname.split('/board/')[1]?.replace(/\/$/, '').split('/')[0] ?? '';
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['board', id],
