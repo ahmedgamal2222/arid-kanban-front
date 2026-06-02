@@ -21,7 +21,7 @@ const BOARD_COLORS = [
   { label: 'Ø³Ù…Ø§ÙˆÙŠ', value: 'from-cyan-600 to-sky-700' },
 ];
 
-const VISIBILITY_OPTIONS = [
+const VISIBILITY_OPTIONS: { value: 'private' | 'workspace' | 'public'; label: string; icon: string }[] = [
   { value: 'private', label: 'Ø®Ø§Øµ', icon: 'ðŸ”’' },
   { value: 'workspace', label: 'Ù„Ù„Ù…Ø³Ø§Ø­Ø©', icon: 'ðŸ¢' },
   { value: 'public', label: 'Ø¹Ø§Ù…', icon: 'ðŸŒ' },
