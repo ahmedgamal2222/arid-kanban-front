@@ -1,5 +1,8 @@
 # Cloudflare Pages SPA rewrites — redirect all dynamic board routes to the static shell
 
+# Root redirect to default locale
+/     /ar/    302
+
 /ar/board/:id/dashboard/    /ar/board/__board__/dashboard/    200
 /en/board/:id/dashboard/    /en/board/__board__/dashboard/    200
 /ar/board/:id/              /ar/board/__board__/              200
