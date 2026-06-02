@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "title": "لوحة ARID للمهام",
+    "description": "منصة إدارة المشاريع البحثية"
+  },
+  "nav": {
+    "workspaces": "مساحات العمل",
+    "boards": "اللوحات",
+    "settings": "الإعدادات",
+    "logout": "تسجيل خروج"
+  },
+  "board": {
+    "addList": "إضافة قائمة",
+    "addCard": "إضافة بطاقة",
+    "title": "العنوان",
+    "description": "الوصف",
+    "members": "الأعضاء",
+    "labels": "الملصقات",
+    "dueDate": "تاريخ الاستحقاق",
+    "checklists": "قوائم التحقق",
+    "attachments": "المرفقات",
+    "comments": "التعليقات",
+    "activity": "النشاط",
+    "timeline": "التسلسل الزمني",
+    "dashboard": "لوحة الإحصائيات",
+    "export": "تصدير",
+    "search": "بحث في البطاقات",
+    "filter": "تصفية",
+    "visibility": {
+      "private": "خاص",
+      "workspace": "مساحة العمل",
+      "public": "عام"
+    }
+  },
+  "card": {
+    "open": "فتح البطاقة",
+    "copy": "نسخ البطاقة",
+    "archive": "أرشفة",
+    "delete": "حذف نهائي",
+    "watch": "متابعة",
+    "unwatch": "إلغاء المتابعة",
+    "addMember": "إضافة عضو",
+    "addLabel": "إضافة ملصق",
+    "addChecklist": "إضافة قائمة تحقق",
+    "addDueDate": "إضافة موعد",
+    "addCover": "إضافة غلاف",
+    "markComplete": "اكتملت",
+    "markIncomplete": "لم تكتمل",
+    "overdue": "متأخرة",
+    "dueToday": "تستحق اليوم",
+    "dueSoon": "قريباً"
+  },
+  "checklist": {
+    "addItem": "إضافة عنصر",
+    "delete": "حذف القائمة",
+    "hideCompleted": "إخفاء المكتملة",
+    "showCompleted": "إظهار المكتملة"
+  },
+  "comment": {
+    "placeholder": "اكتب تعليقاً... (يدعم Markdown و @mentions)",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "edited": "معدَّل"
+  },
+  "workspace": {
+    "create": "إنشاء مساحة عمل",
+    "name": "اسم المساحة",
+    "members": "الأعضاء",
+    "boards": "اللوحات",
+    "settings": "إعدادات المساحة"
+  },
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "create": "إنشاء",
+    "update": "تحديث",
+    "close": "إغلاق",
+    "loading": "جارٍ التحميل...",
+    "error": "حدث خطأ",
+    "empty": "لا توجد عناصر",
+    "search": "بحث...",
+    "noResults": "لا توجد نتائج"
+  }
+}

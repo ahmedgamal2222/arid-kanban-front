@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "title": "ARID Kanban",
+    "description": "Research Project Management Platform"
+  },
+  "nav": {
+    "workspaces": "Workspaces",
+    "boards": "Boards",
+    "settings": "Settings",
+    "logout": "Log out"
+  },
+  "board": {
+    "addList": "Add list",
+    "addCard": "Add card",
+    "title": "Title",
+    "description": "Description",
+    "members": "Members",
+    "labels": "Labels",
+    "dueDate": "Due date",
+    "checklists": "Checklists",
+    "attachments": "Attachments",
+    "comments": "Comments",
+    "activity": "Activity",
+    "timeline": "Timeline",
+    "dashboard": "Dashboard",
+    "export": "Export",
+    "search": "Search cards",
+    "filter": "Filter",
+    "visibility": {
+      "private": "Private",
+      "workspace": "Workspace",
+      "public": "Public"
+    }
+  },
+  "card": {
+    "open": "Open card",
+    "copy": "Copy card",
+    "archive": "Archive",
+    "delete": "Delete",
+    "watch": "Watch",
+    "unwatch": "Unwatch",
+    "addMember": "Add member",
+    "addLabel": "Add label",
+    "addChecklist": "Add checklist",
+    "addDueDate": "Add due date",
+    "addCover": "Add cover",
+    "markComplete": "Mark complete",
+    "markIncomplete": "Mark incomplete",
+    "overdue": "Overdue",
+    "dueToday": "Due today",
+    "dueSoon": "Due soon"
+  },
+  "checklist": {
+    "addItem": "Add item",
+    "delete": "Delete checklist",
+    "hideCompleted": "Hide completed",
+    "showCompleted": "Show completed"
+  },
+  "comment": {
+    "placeholder": "Write a comment... (Supports Markdown & @mentions)",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "edited": "Edited"
+  },
+  "workspace": {
+    "create": "Create workspace",
+    "name": "Workspace name",
+    "members": "Members",
+    "boards": "Boards",
+    "settings": "Workspace settings"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "create": "Create",
+    "update": "Update",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "empty": "Nothing here yet",
+    "search": "Search...",
+    "noResults": "No results found"
+  }
+}
