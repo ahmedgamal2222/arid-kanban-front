@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
 import { boardsApi } from '@/lib/api';
 import type { BoardFull } from '@/lib/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';

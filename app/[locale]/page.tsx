@@ -1,5 +1,3 @@
-import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
 import { workspacesApi } from '@/lib/api';
 
 export const dynamic = 'force-static';
