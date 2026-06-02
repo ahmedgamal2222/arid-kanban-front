@@ -9,9 +9,11 @@ import type { Workspace, Board } from '@/lib/types';
 // ── Logout helper ──
 function useLogout() {
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
   return () => {
     session.clear();
-    router.replace('../login');
+    router.replace(`/${locale}/login`);
   };
 }
 
@@ -155,9 +157,9 @@ export default function BoardsDashboard() {
   // Auth guard
   useEffect(() => {
     if (!session.getToken()) {
-      router.replace('../login');
+      router.replace(`/${locale}/login`);
     }
-  }, [router]);
+  }, [router, locale]);
 
   // Load data
   useEffect(() => {
@@ -183,7 +185,7 @@ export default function BoardsDashboard() {
       } catch (err: any) {
         if (err.message?.includes('401') || err.message?.includes('مصادقة')) {
           session.clear();
-          router.replace('../login');
+          router.replace(`/${locale}/login`);
         } else {
           setError(err.message ?? 'فشل تحميل البيانات');
         }

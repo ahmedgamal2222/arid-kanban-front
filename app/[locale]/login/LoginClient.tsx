@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { authApi, session } from '@/lib/api';
 
@@ -20,6 +20,8 @@ function EyeIcon({ open }: { open: boolean }) {
 
 export default function LoginClient() {
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
@@ -33,7 +35,7 @@ export default function LoginClient() {
     try {
       const res = await authApi.login(email, password);
       session.setToken(res.token);
-      router.replace('boards');
+      router.replace(`/${locale}/boards`);
     } catch (err: any) {
       setError(err.message ?? 'حدث خطأ، حاول مرة أخرى');
     } finally {
