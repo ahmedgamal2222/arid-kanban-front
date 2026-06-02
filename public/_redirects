@@ -3,12 +3,16 @@
 # Root redirect to default locale
 /     /ar/    302
 
+/ar/board/:id/timeline/     /ar/board/__board__/timeline/     200
+/en/board/:id/timeline/     /en/board/__board__/timeline/     200
 /ar/board/:id/dashboard/    /ar/board/__board__/dashboard/    200
 /en/board/:id/dashboard/    /en/board/__board__/dashboard/    200
 /ar/board/:id/              /ar/board/__board__/              200
 /en/board/:id/              /en/board/__board__/              200
 
 # Fallback for non-trailing-slash variants
+/ar/board/:id/timeline      /ar/board/__board__/timeline/     200
+/en/board/:id/timeline      /en/board/__board__/timeline/     200
 /ar/board/:id/dashboard     /ar/board/__board__/dashboard/    200
 /en/board/:id/dashboard     /en/board/__board__/dashboard/    200
 /ar/board/:id               /ar/board/__board__/              200

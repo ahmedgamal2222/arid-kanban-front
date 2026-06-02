@@ -32,15 +32,16 @@ export default function AddCardButton({ listId, boardId }: Props) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="w-full text-start text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg px-2 py-1.5 transition"
+        className="w-full text-start text-[12px] text-slate-500 hover:text-slate-300 hover:bg-white/[0.06] rounded-xl px-3 py-2 transition-all flex items-center gap-2"
       >
-        + إضافة بطاقة
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        إضافة بطاقة
       </button>
     );
   }
 
   return (
-    <div>
+    <div className="space-y-2">
       <textarea
         autoFocus
         rows={2}
@@ -51,17 +52,17 @@ export default function AddCardButton({ listId, boardId }: Props) {
           if (e.key === 'Escape') setOpen(false);
         }}
         placeholder="عنوان البطاقة..."
-        className="w-full rounded-lg border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-700 px-3 py-2 text-sm mb-1.5 outline-none focus:border-blue-500 resize-none"
+        className="w-full rounded-xl border border-white/10 focus:border-blue-500/50 bg-[#1e2d40] px-3 py-2 text-sm text-slate-200 placeholder-slate-600 outline-none resize-none"
       />
       <div className="flex gap-2">
         <button
           onClick={submit}
           disabled={loading || !title.trim()}
-          className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs px-3 py-1.5 rounded-lg transition"
+          className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
         >
           إضافة
         </button>
-        <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-gray-600 text-sm px-2">✕</button>
+        <button onClick={() => setOpen(false)} className="text-slate-500 hover:text-slate-300 text-sm px-2 transition-colors">✕</button>
       </div>
     </div>
   );

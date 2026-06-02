@@ -33,35 +33,35 @@ export default function AddListButton({ boardId, onCreated }: Props) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white rounded-xl px-4 py-3 min-w-[260px] transition shrink-0"
+        className="flex items-center gap-2 bg-white/10 hover:bg-white/[0.16] border border-white/[0.12] hover:border-white/20 text-white/80 hover:text-white rounded-2xl px-4 py-3 min-w-[272px] transition-all shrink-0"
       >
-        <span className="text-lg font-light">+</span>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
         <span className="text-sm font-medium">{t('addList')}</span>
       </button>
     );
   }
 
   return (
-    <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-3 min-w-[260px] shrink-0">
+    <div className="bg-[#162032] border border-white/[0.08] rounded-2xl p-3 min-w-[272px] shrink-0 space-y-2">
       <input
         autoFocus
         value={name}
         onChange={e => setName(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter') submit(); if (e.key === 'Escape') setOpen(false); }}
-        placeholder={t('addList')}
-        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm mb-2 outline-none focus:border-blue-500"
+        placeholder="اسم القائمة..."
+        className="w-full rounded-xl border border-white/10 focus:border-blue-500/50 bg-[#1e2d40] px-3 py-2 text-sm text-slate-200 placeholder-slate-600 outline-none"
       />
       <div className="flex gap-2">
         <button
           onClick={submit}
           disabled={loading || !name.trim()}
-          className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm px-4 py-1.5 rounded-lg transition"
+          className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-1.5 rounded-lg transition-colors"
         >
           {t('addList')}
         </button>
         <button
           onClick={() => setOpen(false)}
-          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 text-sm px-3"
+          className="text-slate-500 hover:text-slate-300 text-sm px-3 transition-colors"
         >
           ✕
         </button>
