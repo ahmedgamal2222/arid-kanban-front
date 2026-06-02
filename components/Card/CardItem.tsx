@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -52,7 +52,7 @@ export default function CardItem({ card, boardId, listId, isDragOverlay }: Props
           isDragOverlay ? 'rotate-2 shadow-2xl shadow-black/50 scale-[1.03]' : '',
         ].join(' ')}
       >
-        {/* غلاف ملون علوي */}
+        {/* ØºÙ„Ø§Ù Ù…Ù„ÙˆÙ† Ø¹Ù„ÙˆÙŠ */}
         {card.cover_color && (
           <div
             className="h-9 rounded-t-xl w-full"
@@ -61,7 +61,7 @@ export default function CardItem({ card, boardId, listId, isDragOverlay }: Props
         )}
 
         <div className={card.cover_color ? 'px-3 pt-2 pb-3' : 'p-3'}>
-          {/* الملصقات */}
+          {/* Ø§Ù„Ù…Ù„ØµÙ‚Ø§Øª */}
           {card.labels.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-2">
               {card.labels.map(label => (
@@ -75,12 +75,12 @@ export default function CardItem({ card, boardId, listId, isDragOverlay }: Props
             </div>
           )}
 
-          {/* العنوان */}
+          {/* Ø§Ù„Ø¹Ù†ÙˆØ§Ù† */}
           <p className="text-[13px] font-medium text-slate-100 leading-snug break-words">
             {card.title}
           </p>
 
-          {/* الوسوم السفلية */}
+          {/* Ø§Ù„ÙˆØ³ÙˆÙ… Ø§Ù„Ø³ÙÙ„ÙŠØ© */}
           {(card.due_date || card.checklist_progress.total > 0 || card.comments_count > 0 || card.attachments_count > 0 || card.members.length > 0) && (
             <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
               {card.due_date && (
@@ -132,80 +132,6 @@ export default function CardItem({ card, boardId, listId, isDragOverlay }: Props
                   )}
                 </div>
               )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {open && (
-        <CardDetailModal cardId={card.id} boardId={boardId} onClose={() => setOpen(false)} />
-      )}
-    </>
-  );
-}
-
-        {/* غلاف ملون */}
-        {card.cover_color && (
-          <div
-            className="h-8 rounded-t-md -mx-3 -mt-3 mb-2"
-            style={{ background: card.cover_color }}
-          />
-        )}
-
-        {/* الملصقات */}
-        {card.labels.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-2">
-            {card.labels.map(label => (
-              <span
-                key={label.id}
-                className="h-2 w-8 rounded-full inline-block"
-                style={{ background: label.color }}
-                title={label.name ?? undefined}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* العنوان */}
-        <p className="text-sm font-medium text-gray-800 dark:text-gray-100 leading-snug">
-          {card.title}
-        </p>
-
-        {/* الوسوم السفلية */}
-        <div className="flex items-center gap-2 mt-2 flex-wrap">
-          {card.due_date && (
-            <CardDueBadge dueDate={card.due_date} complete={!!card.due_complete} />
-          )}
-          {card.checklist_progress.total > 0 && (
-            <span className={`text-xs flex items-center gap-1 rounded px-1.5 py-0.5 ${
-              card.checklist_progress.completed === card.checklist_progress.total
-                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                : 'bg-gray-100 text-gray-500 dark:bg-gray-600 dark:text-gray-300'
-            }`}>
-              ☑ {card.checklist_progress.completed}/{card.checklist_progress.total}
-            </span>
-          )}
-          {card.comments_count > 0 && (
-            <span className="text-xs text-gray-400 flex items-center gap-0.5">
-              💬 {card.comments_count}
-            </span>
-          )}
-          {card.attachments_count > 0 && (
-            <span className="text-xs text-gray-400 flex items-center gap-0.5">
-              📎 {card.attachments_count}
-            </span>
-          )}
-          {card.members.length > 0 && (
-            <div className="flex -space-x-1 ms-auto">
-              {card.members.slice(0, 3).map(id => (
-                <div
-                  key={id}
-                  className="w-5 h-5 rounded-full bg-blue-400 text-white text-xs flex items-center justify-center border border-white dark:border-gray-700 font-semibold"
-                  title={id}
-                >
-                  {id.slice(0, 1).toUpperCase()}
-                </div>
-              ))}
             </div>
           )}
         </div>
