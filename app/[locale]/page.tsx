@@ -266,7 +266,7 @@ export default function HomePage() {
                 amber: 'from-amber-500/8 to-amber-600/4 border-amber-500/15 bg-amber-500/10',
                 pink: 'from-pink-500/8 to-pink-600/4 border-pink-500/15 bg-pink-500/10',
               };
-              const [grad, border, iconBg] = colors[f.color].split(' ');
+              const [grad, border, iconBg] = (colors[f.color] ?? colors['blue']).split(' ');
               return (
                 <div key={f.title} className={`bg-gradient-to-br ${grad} ${border} border rounded-2xl p-6 hover:scale-[1.02] transition-transform duration-200`}>
                   <div className={`${iconBg} w-11 h-11 rounded-xl flex items-center justify-center mb-5`}>
