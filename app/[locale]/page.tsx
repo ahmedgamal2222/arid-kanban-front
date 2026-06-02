@@ -1,8 +1,11 @@
 export const dynamic = 'force-static';
+import AuthRedirect from '@/components/AuthRedirect';
 
 export default function HomePage() {
   return (
-    <main dir="rtl" className="min-h-screen bg-[#060b18] text-white overflow-x-hidden">
+    <>
+      <AuthRedirect to="boards" />
+      <main dir="rtl" className="min-h-screen bg-[#060b18] text-white overflow-x-hidden">
 
       {/* ── Background layers ── */}
       <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
@@ -368,5 +371,6 @@ export default function HomePage() {
 
       </div>
     </main>
+    </>
   );
 }

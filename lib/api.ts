@@ -64,6 +64,7 @@ export const workspacesApi = {
   create: (data: { name: string; description?: string }) =>
     apiFetch<{ workspace: Workspace }>('/workspaces', { method: 'POST', body: JSON.stringify(data) }),
   fetch: (id: string) => apiFetch<{ workspace: Workspace }>(`/workspaces/${id}`),
+  boards: (id: string) => apiFetch<{ boards: Board[] }>(`/workspaces/${id}/boards`),
 };
 
 // ── Boards ──

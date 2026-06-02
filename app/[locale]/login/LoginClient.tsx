@@ -33,7 +33,7 @@ export default function LoginClient() {
     try {
       const res = await authApi.login(email, password);
       session.setToken(res.token);
-      router.replace('/ar/');
+      router.replace('boards');
     } catch (err: any) {
       setError(err.message ?? 'حدث خطأ، حاول مرة أخرى');
     } finally {
