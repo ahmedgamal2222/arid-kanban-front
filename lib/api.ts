@@ -141,6 +141,14 @@ export const cardsApi = {
     apiFetch<{ watching: boolean }>(`/cards/${id}/watch`, { method: 'POST' }),
 };
 
+// ── Users ──
+export const usersApi = {
+  search: (q: string) =>
+    apiFetch<{ users: { id: string; name: string; email: string }[] }>(
+      `/users/search?q=${encodeURIComponent(q)}`
+    ),
+};
+
 // ── Comments ──
 export const commentsApi = {
   create: (cardId: string, data: { body: string; parent_id?: string }) =>

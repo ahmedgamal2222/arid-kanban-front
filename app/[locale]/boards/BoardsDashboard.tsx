@@ -126,12 +126,12 @@ function CreateBoardModal({ workspace, onClose, onCreated }: { workspace: Worksp
 
 // ── Board colors palette ──
 const BOARD_COLORS = [
-  'from-blue-600 to-indigo-700',
-  'from-violet-600 to-purple-700',
-  'from-emerald-600 to-teal-700',
-  'from-orange-600 to-amber-700',
-  'from-pink-600 to-rose-700',
-  'from-cyan-600 to-sky-700',
+  'linear-gradient(135deg,#2563eb,#4338ca)',
+  'linear-gradient(135deg,#7c3aed,#7e22ce)',
+  'linear-gradient(135deg,#059669,#0f766e)',
+  'linear-gradient(135deg,#ea580c,#b45309)',
+  'linear-gradient(135deg,#db2777,#be123c)',
+  'linear-gradient(135deg,#0891b2,#0369a1)',
 ];
 function getBoardColor(id: string) {
   const idx = id.charCodeAt(0) % BOARD_COLORS.length;
@@ -350,7 +350,7 @@ export default function BoardsDashboard() {
                         className="group relative rounded-2xl overflow-hidden border border-white/[0.07] hover:border-white/15 transition-all duration-200 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/40"
                       >
                         {/* Color band */}
-                        <div className={`h-20 bg-gradient-to-br ${getBoardColor(board.id)} opacity-80 group-hover:opacity-100 transition-opacity`} />
+                        <div className="h-20 opacity-80 group-hover:opacity-100 transition-opacity" style={{ background: getBoardColor(board.id) }} />
                         <div className="bg-[#0d1425] px-4 py-3">
                           <div className="flex items-start justify-between gap-2">
                             <h3 className="font-medium text-white text-sm leading-snug">{board.name}</h3>

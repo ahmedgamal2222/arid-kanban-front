@@ -70,8 +70,18 @@ export default function BoardPageClient() {
 
   const board = data.board as BoardFull;
 
-  return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ background: board.background ?? '#1d2d44' }}>
+  // Map legacy Tailwind class strings → real CSS gradients
+  const LEGACY_BG: Record<string, string> = {
+    'from-blue-600 to-indigo-700':   'linear-gradient(135deg,#2563eb,#4338ca)',
+    'from-violet-600 to-purple-700': 'linear-gradient(135deg,#7c3aed,#7e22ce)',
+    'from-emerald-600 to-teal-700':  'linear-gradient(135deg,#059669,#0f766e)',
+    'from-orange-600 to-amber-700':  'linear-gradient(135deg,#ea580c,#b45309)',
+    'from-pink-600 to-rose-700':     'linear-gradient(135deg,#db2777,#be123c)',
+    'from-cyan-600 to-sky-700':      'linear-gradient(135deg,#0891b2,#0369a1)',
+  };
+  const bg = board.background
+    ? (LEGACY_BG[board.background] ?? board.background)
+    : '#1d2d44';
       <BoardHeader board={board} />
       <BoardCanvas board={board} />
     </div>

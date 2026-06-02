@@ -84,11 +84,42 @@ export default function BoardCanvas({ board }: Props) {
 
     if (activeType === 'card') {
       const cardId = active.id as string;
+      const fromListId = active.data.current?.listId as string;
       const toListId = over.data.current?.type === 'list'
         ? (over.id as string)
         : (over.data.current?.listId as string);
 
-      // البحث عن الموضع الجديد
+      if (!toListId) return;
+
+      // Same-list reorder: use arrayMove to update local state
+      if (fromListId === toListId) {
+        const list = lists.find(l => l.id === toListId);
+        if (!list) return;
+        const oldIdx = list.cards.findIndex(c => c.id === cardId);
+        const newIdx = over.data.current?.type === 'card'
+          ? list.cards.findIndex(c => c.id === over.id)
+          : list.cards.length - 1;
+        if (oldIdx === newIdx || newIdx < 0) return;
+
+        const reordered = arrayMove(list.cards, oldIdx, newIdx);
+        setLists(prev => prev.map(l => l.id === toListId ? { ...l, cards: reordered } : l));
+
+        const before = reordered[newIdx - 1]?.position ?? null;
+        const after  = reordered[newIdx + 1]?.position ?? null;
+        const newPos = before != null && after != null
+          ? (before + after) / 2
+          : before != null ? before + 1
+          : after != null  ? after / 2
+          : 0.5;
+
+        try {
+          await cardsApi.update(cardId, { position: newPos });
+          qc.invalidateQueries({ queryKey: ['board', board.id] });
+        } catch { setLists(board.lists); }
+        return;
+      }
+
+      // Cross-list move: position already updated by handleDragOver
       const toList = lists.find(l => l.id === toListId);
       if (!toList) return;
 
@@ -108,7 +139,6 @@ export default function BoardCanvas({ board }: Props) {
         await cardsApi.update(cardId, { list_id: toListId, position: newPos });
         qc.invalidateQueries({ queryKey: ['board', board.id] });
       } catch {
-        // revert on error
         setLists(board.lists);
       }
     }

@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { cardsApi, boardsApi, commentsApi, checklistsApi } from '@/lib/api';
+import { cardsApi, boardsApi, commentsApi, checklistsApi, usersApi } from '@/lib/api';
 import type { CardDetail } from '@/lib/types';
 import CardDueBadge from '../CardDueBadge';
 import CommentSection from './CommentSection';
@@ -29,6 +29,10 @@ export default function CardDetailModal({ cardId, boardId, onClose, onDeleted }:
   const [activePanel, setActivePanel] = useState<'labels' | 'members' | 'cover' | 'dates' | null>(null);
   const [addMemberId, setAddMemberId] = useState('');
   const [addMemberLoading, setAddMemberLoading] = useState(false);
+  const [memberSearch, setMemberSearch] = useState('');
+  const [memberResults, setMemberResults] = useState<{id:string;name:string;email:string}[]>([]);
+  const [memberSearching, setMemberSearching] = useState(false);
+  const [memberDropdown, setMemberDropdown] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -82,6 +86,34 @@ export default function CardDetailModal({ cardId, boardId, onClose, onDeleted }:
       await cardsApi.removeMember(cardId, aridId);
       qc.invalidateQueries({ queryKey: ['card', cardId] });
     } catch { toast.error('فشل الإزالة'); }
+  }
+
+  // Member search with debounce
+  useEffect(() => {
+    if (memberSearch.length < 2) { setMemberResults([]); return; }
+    const t = setTimeout(async () => {
+      setMemberSearching(true);
+      try {
+        const res = await usersApi.search(memberSearch);
+        setMemberResults(res.users);
+        setMemberDropdown(true);
+      } catch { /* ignore */ }
+      finally { setMemberSearching(false); }
+    }, 300);
+    return () => clearTimeout(t);
+  }, [memberSearch]);
+
+  async function handlePickMember(userId: string) {
+    setAddMemberLoading(true);
+    setMemberDropdown(false);
+    setMemberSearch('');
+    setMemberResults([]);
+    try {
+      await cardsApi.addMember(cardId, userId);
+      qc.invalidateQueries({ queryKey: ['card', cardId] });
+      toast.success('تمت إضافة العضو');
+    } catch (err: any) { toast.error(err.message ?? 'فشل الإضافة'); }
+    finally { setAddMemberLoading(false); }
   }
 
   async function handleToggleLabel(labelId: string, isActive: boolean) {
@@ -253,17 +285,48 @@ export default function CardDetailModal({ cardId, boardId, onClose, onDeleted }:
 
             {activePanel === 'members' && (
               <div className="mt-4 p-4 bg-white/[0.03] border border-white/[0.08] rounded-xl">
-                <h4 className="text-xs font-semibold text-slate-400 mb-3">إضافة عضو</h4>
-                <div className="flex gap-2">
-                  <input value={addMemberId} onChange={e => setAddMemberId(e.target.value)}
-                    placeholder="معرف ARID"
-                    className="flex-1 bg-white/[0.05] border border-white/10 focus:border-blue-500/50 focus:outline-none text-white placeholder-slate-500 rounded-lg px-3 py-2 text-xs"
-                    onKeyDown={e => { if (e.key === 'Enter') handleAddMember(); }}
-                  />
-                  <button onClick={handleAddMember} disabled={addMemberLoading}
-                    className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-3 py-2 rounded-lg text-xs transition-colors">
-                    إضافة
-                  </button>
+                <h4 className="text-xs font-semibold text-slate-400 mb-3">إضافة عضو للبطاقة</h4>
+                <div className="relative">
+                  <div className="relative">
+                    <input
+                      value={memberSearch}
+                      onChange={e => setMemberSearch(e.target.value)}
+                      onFocus={() => memberResults.length > 0 && setMemberDropdown(true)}
+                      placeholder="ابحث بالاسم أو الإيميل..."
+                      className="w-full bg-white/[0.05] border border-white/10 focus:border-blue-500/50 focus:outline-none text-white placeholder-slate-500 rounded-lg px-3 py-2 text-xs pe-7"
+                    />
+                    {(memberSearching || addMemberLoading) && (
+                      <div className="absolute inset-y-0 left-2 flex items-center">
+                        <div className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    )}
+                  </div>
+                  {memberDropdown && memberResults.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-[#0a111e] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-[70]">
+                      {memberResults.map(u => {
+                        const alreadyAdded = card.members?.some((m: any) =>
+                          (m.arid_researcher_id ?? m) === u.id
+                        );
+                        return (
+                          <button
+                            key={u.id}
+                            disabled={alreadyAdded}
+                            onClick={() => handlePickMember(u.id)}
+                            className={`w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-white/[0.07] transition-colors text-start ${alreadyAdded ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          >
+                            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-[11px] font-bold text-white shrink-0">
+                              {u.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs text-white font-medium truncate">{u.name}</p>
+                              <p className="text-[10px] text-slate-500 truncate">{u.email}</p>
+                            </div>
+                            {alreadyAdded && <span className="text-[10px] text-slate-600">مضاف</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
