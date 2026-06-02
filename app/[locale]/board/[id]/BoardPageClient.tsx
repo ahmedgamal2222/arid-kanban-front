@@ -82,6 +82,9 @@ export default function BoardPageClient() {
   const bg = board.background
     ? (LEGACY_BG[board.background] ?? board.background)
     : '#1d2d44';
+
+  return (
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: bg }}>
       <BoardHeader board={board} />
       <BoardCanvas board={board} />
     </div>
