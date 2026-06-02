@@ -3,6 +3,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import { boardsApi } from '@/lib/api';
+
+// Required for output: 'export' — actual IDs resolved client-side via useParams
+export function generateStaticParams() {
+  return [{ id: '__board__' }];
+}
 import BoardCanvas from '@/components/Board/BoardCanvas';
 import BoardHeader from '@/components/Board/BoardHeader';
 import type { BoardFull } from '@/lib/types';

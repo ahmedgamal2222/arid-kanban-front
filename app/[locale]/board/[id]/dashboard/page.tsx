@@ -2,6 +2,11 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
+
+// Required for output: 'export' — actual IDs resolved client-side via useParams
+export function generateStaticParams() {
+  return [{ id: '__board__' }];
+}
 import { boardsApi } from '@/lib/api';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
