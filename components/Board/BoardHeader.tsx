@@ -136,7 +136,7 @@ function BoardSettingsPanel({ board, onClose }: { board: BoardFull; onClose: () 
   const locale = pathname.split('/')[1] ?? 'ar';
 
   const rawBg = (board as any).background ?? '';
-  const initBg = LEGACY[rawBg] ?? rawBg ?? BOARD_COLORS[0].value;
+  const initBg = LEGACY[rawBg] ?? rawBg ?? 'linear-gradient(135deg,#2563eb,#4338ca)';
 
   const [name, setName] = useState(board.name);
   const [visibility, setVisibility] = useState<'private' | 'workspace' | 'public'>(
