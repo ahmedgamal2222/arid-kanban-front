@@ -56,6 +56,18 @@ export const authApi = {
     }),
 
   me: () => apiFetch<{ id: string; email: string; name: string; role: string }>('/auth/me'),
+
+  /** تسجيل الدخول باستخدام رمز ARID Portal */
+  aridSso: (token: string) =>
+    fetch(`${AUTH_BASE}/auth/arid-sso`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    }).then(async (r) => {
+      const data = await r.json() as any;
+      if (!r.ok) throw new Error(data.error ?? `HTTP ${r.status}`);
+      return data as { success: boolean; token: string; user: { id: string; email: string; name: string; role: string } };
+    }),
 };
 
 // ── Workspaces ──
