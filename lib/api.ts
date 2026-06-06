@@ -153,6 +153,26 @@ export const cardsApi = {
     apiFetch<{ watching: boolean }>(`/cards/${id}/watch`, { method: 'POST' }),
 };
 
+// ── Notifications ──
+export const notificationsApi = {
+  list: () => apiFetch<{ notifications: Notification[]; unread_count: number }>('/notifications'),
+  markRead: (id: string) => apiFetch<{ success: boolean }>(`/notifications/${id}/read`, { method: 'PATCH' }),
+  markAllRead: () => apiFetch<{ success: boolean }>('/notifications/read-all', { method: 'PATCH' }),
+};
+
+export interface Notification {
+  id: string;
+  type: string;
+  actor_name: string;
+  card_id: string | null;
+  card_title: string | null;
+  board_id: string | null;
+  board_name: string | null;
+  message: string;
+  is_read: 0 | 1;
+  created_at: number;
+}
+
 // ── Users ──
 export const usersApi = {
   search: (q: string) =>

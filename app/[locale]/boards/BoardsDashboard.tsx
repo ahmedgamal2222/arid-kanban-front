@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { workspacesApi, boardsApi, authApi, session } from '@/lib/api';
 import type { Workspace, Board } from '@/lib/types';
+import NotificationBell from '@/components/Notifications/Bell';
 
 // ── Logout helper ──
 function useLogout() {
@@ -257,6 +258,7 @@ export default function BoardsDashboard() {
                 <span className="text-sm text-slate-300 hidden sm:block">{user.name}</span>
               </div>
             )}
+            <NotificationBell />
             <button
               onClick={logout}
               className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 hover:bg-white/[0.05] border border-transparent hover:border-white/[0.07] px-3 py-2 rounded-xl transition-all"

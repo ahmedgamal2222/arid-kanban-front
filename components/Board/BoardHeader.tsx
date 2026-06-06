@@ -7,6 +7,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import NotificationBell from '@/components/Notifications/Bell';
 
 interface Props { board: BoardFull }
 
@@ -420,6 +421,9 @@ export default function BoardHeader({ board }: Props) {
 
       {/* Spacer */}
       <div className="flex-1" />
+
+      {/* Notification bell */}
+      <NotificationBell />
 
       {/* Timeline / Dashboard links */}
       <Link href={`/${locale}/board/${board.id}/timeline`}
