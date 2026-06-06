@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { workspacesApi, boardsApi, authApi, session } from '@/lib/api';
+import { workspacesApi, boardsApi, authApi, usersApi, session } from '@/lib/api';
 import type { Workspace, Board } from '@/lib/types';
 import NotificationBell from '@/components/Notifications/Bell';
 
@@ -125,8 +125,128 @@ function CreateBoardModal({ workspace, onClose, onCreated }: { workspace: Worksp
   );
 }
 
-// ── Board colors palette ──
-const BOARD_COLORS = [
+// ── Workspace Members Modal ──
+interface WsMember { arid_researcher_id: string; role: string; name?: string; email?: string }
+
+function WorkspaceMembersModal({ workspace, onClose }: { workspace: Workspace; onClose: () => void }) {
+  const [members, setMembers] = useState<WsMember[]>([]);
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<{ id: string; name: string; email: string }[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [adding, setAdding] = useState<string | null>(null);
+  const [removing, setRemoving] = useState<string | null>(null);
+  const [error, setError] = useState('');
+  const searchRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    workspacesApi.fetch(workspace.id)
+      .then(r => setMembers((r.workspace as any).members ?? []))
+      .catch(() => {});
+  }, [workspace.id]);
+
+  useEffect(() => {
+    if (!query.trim()) { setResults([]); return; }
+    if (searchRef.current) clearTimeout(searchRef.current);
+    searchRef.current = setTimeout(async () => {
+      setSearching(true);
+      try { setResults((await usersApi.search(query)).users); }
+      catch { setResults([]); }
+      finally { setSearching(false); }
+    }, 300);
+  }, [query]);
+
+  async function handleAdd(userId: string) {
+    setAdding(userId);
+    setError('');
+    try {
+      await workspacesApi.addMember(workspace.id, userId);
+      const fresh = await workspacesApi.fetch(workspace.id);
+      setMembers((fresh.workspace as any).members ?? []);
+      setQuery(''); setResults([]);
+    } catch (e: any) { setError(e.message ?? 'فشل الإضافة'); }
+    finally { setAdding(null); }
+  }
+
+  async function handleRemove(memberId: string) {
+    setRemoving(memberId);
+    try {
+      await workspacesApi.removeMember(workspace.id, memberId);
+      setMembers(prev => prev.filter(m => m.arid_researcher_id !== memberId));
+    } catch (e: any) { setError(e.message ?? 'فشل الإزالة'); }
+    finally { setRemoving(null); }
+  }
+
+  const existingIds = members.map(m => m.arid_researcher_id);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div className="w-full max-w-md bg-[#111827] border border-white/10 rounded-2xl p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-base font-bold text-white">أعضاء: {workspace.name}</h2>
+          <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        {error && <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2 mb-4">{error}</p>}
+
+        {/* Search */}
+        <div className="relative mb-4">
+          <input
+            type="text" value={query} onChange={e => setQuery(e.target.value)}
+            placeholder="ابحث عن مستخدم بالاسم أو البريد..."
+            className="w-full bg-white/[0.05] border border-white/10 focus:border-blue-500/50 focus:outline-none text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm"
+          />
+          {searching && <div className="absolute left-3 top-3 w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />}
+          {results.length > 0 && (
+            <div className="absolute z-10 top-full mt-1 w-full bg-[#0d1425] border border-white/10 rounded-xl overflow-hidden shadow-xl">
+              {results.filter(u => !existingIds.includes(u.id)).map(u => (
+                <button key={u.id} onClick={() => handleAdd(u.id)} disabled={adding === u.id}
+                  className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/[0.05] transition-colors text-left">
+                  <div>
+                    <p className="text-sm text-white">{u.name}</p>
+                    <p className="text-xs text-slate-500">{u.email}</p>
+                  </div>
+                  {adding === u.id
+                    ? <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                    : <span className="text-xs text-blue-400">إضافة</span>}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Members list */}
+        <div className="space-y-2 max-h-64 overflow-y-auto">
+          {members.length === 0
+            ? <p className="text-slate-500 text-sm text-center py-4">لا يوجد أعضاء بعد</p>
+            : members.map(m => (
+              <div key={m.arid_researcher_id} className="flex items-center justify-between bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-2.5">
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold">
+                    {(m.name ?? m.arid_researcher_id).charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm text-white">{m.name ?? m.arid_researcher_id}</p>
+                    <p className="text-xs text-slate-500">{m.role}</p>
+                  </div>
+                </div>
+                {m.role !== 'owner' && (
+                  <button onClick={() => handleRemove(m.arid_researcher_id)} disabled={removing === m.arid_researcher_id}
+                    className="text-slate-600 hover:text-red-400 transition-colors text-xs">
+                    {removing === m.arid_researcher_id ? '...' : 'إزالة'}
+                  </button>
+                )}
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Board colors palette ──const BOARD_COLORS = [
   'linear-gradient(135deg,#2563eb,#4338ca)',
   'linear-gradient(135deg,#7c3aed,#7e22ce)',
   'linear-gradient(135deg,#059669,#0f766e)',
@@ -154,6 +274,7 @@ export default function BoardsDashboard() {
 
   const [showCreateWs, setShowCreateWs] = useState(false);
   const [createBoardFor, setCreateBoardFor] = useState<Workspace | null>(null);
+  const [manageMembersFor, setManageMembersFor] = useState<Workspace | null>(null);
 
   // Auth guard
   useEffect(() => {
@@ -231,6 +352,9 @@ export default function BoardsDashboard() {
       )}
       {createBoardFor && (
         <CreateBoardModal workspace={createBoardFor} onClose={() => setCreateBoardFor(null)} onCreated={handleBoardCreated} />
+      )}
+      {manageMembersFor && (
+        <WorkspaceMembersModal workspace={manageMembersFor} onClose={() => setManageMembersFor(null)} />
       )}
 
       <div dir="rtl" className="min-h-screen bg-[#060b18] text-white">
@@ -334,6 +458,13 @@ export default function BoardsDashboard() {
                         {boards.length} لوحة
                       </span>
                     </div>
+                    <button
+                      onClick={() => setManageMembersFor(ws)}
+                      className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white hover:bg-white/[0.06] border border-white/[0.06] hover:border-white/[0.12] px-3 py-1.5 rounded-lg transition-all"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                      الأعضاء
+                    </button>
                     <button
                       onClick={() => setCreateBoardFor(ws)}
                       className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white hover:bg-white/[0.06] border border-white/[0.06] hover:border-white/[0.12] px-3 py-1.5 rounded-lg transition-all"
