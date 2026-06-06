@@ -73,46 +73,10 @@ export default function LoginClient() {
     setError('');
     setLoading(true);
     try {
-      // Step 1: authenticate directly with ARID portal from the browser
-      // The browser can reach portal.arid.my without CORS issues
-      let aridJwt: string | null = null;
-
-      // Try /api/kanban-auth/login first (new endpoint), fall back to /JWTAuthorization/Login
-      const endpoints = [
-        { url: 'https://portal.arid.my/api/kanban-auth/login', body: { Email: aridEmail.trim(), Password: aridPassword } },
-        { url: 'https://portal.arid.my/JWTAuthorization/Login', body: { Username: aridEmail.trim(), Password: aridPassword } },
-      ];
-
-      let lastError = '';
-      for (const ep of endpoints) {
-        try {
-          const r = await fetch(ep.url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(ep.body),
-          });
-          if (r.ok) {
-            const d = await r.json() as any;
-            aridJwt = d?.token ?? d?.Token ?? null;
-            if (aridJwt) break;
-          } else {
-            const d = await r.json().catch(() => ({})) as any;
-            lastError = d?.error ?? d?.message ?? `HTTP ${r.status}`;
-          }
-        } catch {
-          // try next endpoint
-        }
-      }
-
-      if (!aridJwt) {
-        throw new Error(lastError || 'البريد الإلكتروني أو كلمة المرور غير صحيحة في منصة ARID');
-      }
-
-      // Step 2: exchange ARID JWT for Kanban JWT (Worker verifies signature)
-      const res = await authApi.aridSso(aridJwt);
+      const res = await authApi.aridLogin(aridEmail.trim(), aridPassword);
       onSuccess(res.token);
     } catch (err: any) {
-      setError(err.message ?? 'حدث خطأ، حاول مرة أخرى');
+      setError(err.message ?? 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
     } finally {
       setLoading(false);
     }
