@@ -41,8 +41,10 @@ export default function LoginClient() {
   const [password, setPassword] = useState('');
   const [showPw, setShowPw]     = useState(false);
 
-  // ARID SSO state
-  const [aridToken, setAridToken] = useState('');
+  // ARID login state
+  const [aridEmail, setAridEmail] = useState('');
+  const [aridPassword, setAridPassword] = useState('');
+  const [showAridPw, setShowAridPw] = useState(false);
 
   const [error, setError]     = useState('');
   const [loading, setLoading] = useState(false);
@@ -69,14 +71,12 @@ export default function LoginClient() {
   async function handleAridLogin(e: React.FormEvent) {
     e.preventDefault();
     setError('');
-    const t = aridToken.trim();
-    if (!t) { setError('يرجى لصق رمز ARID'); return; }
     setLoading(true);
     try {
-      const res = await authApi.aridSso(t);
+      const res = await authApi.aridLogin(aridEmail.trim(), aridPassword);
       onSuccess(res.token);
     } catch (err: any) {
-      setError(err.message ?? 'رمز ARID غير صالح');
+      setError(err.message ?? 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
     } finally {
       setLoading(false);
     }
@@ -192,53 +192,65 @@ export default function LoginClient() {
           {tab === 'arid' && (
             <form onSubmit={handleAridLogin} className="space-y-4">
               {/* Info box */}
-              <div className="bg-blue-500/[0.08] border border-blue-500/20 rounded-xl p-4 text-sm text-slate-300 space-y-2">
-                <p className="font-semibold text-blue-300 flex items-center gap-2">
-                  <span>🔬</span> تسجيل الدخول بحساب ARID
+              {/* Info box */}
+              <div className="bg-blue-500/[0.08] border border-blue-500/20 rounded-xl p-4 text-sm text-slate-300">
+                <p className="font-semibold text-blue-300 flex items-center gap-2 mb-1">
+                  <span>🔬</span> تسجيل الدخول بحساب ARID Portal
                 </p>
-                <ol className="text-xs text-slate-400 space-y-1 list-decimal list-inside">
-                  <li>افتح بوابة ARID على <span className="text-blue-400 font-mono">portal.arid.my</span></li>
-                  <li>سجّل دخولك وانسخ رمز JWT الخاص بك</li>
-                  <li>الصق الرمز في الحقل أدناه</li>
-                </ol>
+                <p className="text-xs text-slate-400">
+                  استخدم نفس البريد الإلكتروني وكلمة المرور الخاصة بك في{' '}
+                  <span className="text-blue-400 font-mono">portal.arid.my</span>
+                </p>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-medium text-slate-300 tracking-wide uppercase">رمز ARID (JWT Token)</label>
-                <textarea
-                  value={aridToken}
-                  onChange={e => setAridToken(e.target.value)}
-                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                  rows={4}
-                  dir="ltr"
-                  className="w-full bg-white/[0.05] border border-white/[0.09] hover:border-white/[0.14] focus:border-blue-500/60 focus:outline-none text-white placeholder-slate-600 rounded-xl px-4 py-2.5 text-xs font-mono transition-all resize-none"
-                />
-                <p className="text-[11px] text-slate-600">الرمز سري — لا تشاركه مع أحد</p>
+                <label className="block text-xs font-medium text-slate-300 tracking-wide uppercase">البريد الإلكتروني</label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-500">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                  </div>
+                  <input type="email" required value={aridEmail} onChange={e => setAridEmail(e.target.value)}
+                    placeholder="your@arid.email" dir="ltr"
+                    className={`${inputCls} pr-10`} />
+                </div>
               </div>
 
-              <button type="submit" disabled={loading || !aridToken.trim()} className={btnCls}>
+              <div className="space-y-1.5">
+                <label className="block text-xs font-medium text-slate-300 tracking-wide uppercase">كلمة المرور</label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-500">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                  </div>
+                  <input type={showAridPw ? 'text' : 'password'} required value={aridPassword}
+                    onChange={e => setAridPassword(e.target.value)} placeholder="••••••••"
+                    className={`${inputCls} pr-10 pl-11`} />
+                  <button type="button" onClick={() => setShowAridPw(!showAridPw)}
+                    className="absolute inset-y-0 left-3 flex items-center text-slate-500 hover:text-slate-300 transition-colors">
+                    <EyeIcon open={showAridPw} />
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" disabled={loading} className={btnCls}>
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
                     <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"/>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
                     </svg>
-                    جارٍ التحقق من الرمز...
+                    جارٍ التحقق...
                   </span>
                 ) : 'دخول بحساب ARID'}
               </button>
 
-              {/* Divider */}
-              <div className="flex items-center gap-3 pt-1">
-                <div className="flex-1 h-px bg-white/[0.07]" />
-                <span className="text-xs text-slate-600">أو</span>
-                <div className="flex-1 h-px bg-white/[0.07]" />
-              </div>
-
-              <p className="text-center text-sm text-slate-500">
+              <p className="text-center text-sm text-slate-500 pt-1">
                 ليس لديك حساب ARID؟{' '}
-                <Link href={`/${locale}/register`} className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
-                  إنشاء حساب محلي
+                <Link href="https://portal.arid.my" target="_blank" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
+                  التسجيل في بوابة ARID
                 </Link>
               </p>
             </form>

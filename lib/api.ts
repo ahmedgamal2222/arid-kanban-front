@@ -68,6 +68,18 @@ export const authApi = {
       if (!r.ok) throw new Error(data.error ?? `HTTP ${r.status}`);
       return data as { success: boolean; token: string; user: { id: string; email: string; name: string; role: string } };
     }),
+
+  /** تسجيل الدخول ببريد ARID Portal وكلمة المرور مباشرةً */
+  aridLogin: (email: string, password: string) =>
+    fetch(`${AUTH_BASE}/auth/arid-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    }).then(async (r) => {
+      const data = await r.json() as any;
+      if (!r.ok) throw new Error(data.error ?? `HTTP ${r.status}`);
+      return data as { success: boolean; token: string; user: { id: string; email: string; name: string; role: string } };
+    }),
 };
 
 // ── Workspaces ──
