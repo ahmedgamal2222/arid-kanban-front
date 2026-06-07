@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { notificationsApi, type Notification } from '@/lib/api';
 import { useRouter, usePathname } from 'next/navigation';
@@ -25,7 +26,9 @@ function timeAgo(ts: number): string {
 
 export default function NotificationBell() {
   const [open, setOpen] = useState(false);
+  const [dropdownStyle, setDropdownStyle] = useState({ top: 0, right: 0 });
   const ref = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
   const qc = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
@@ -73,21 +76,136 @@ export default function NotificationBell() {
     }
   }
 
+  // Calculate dropdown position from button
+  const calcPosition = useCallback(() => {
+    if (!btnRef.current) return;
+    const rect = btnRef.current.getBoundingClientRect();
+    setDropdownStyle({
+      top: rect.bottom + 8,
+      right: Math.max(8, window.innerWidth - rect.right - 4),
+    });
+  }, []);
+
   // Mark all as read when dropdown opens
   function handleOpenToggle() {
+    calcPosition();
     setOpen(v => {
       const next = !v;
       if (next && unread > 0) {
-        // Delay slightly so the user sees the unread state first
         setTimeout(() => markAll.mutate(), 1500);
       }
       return next;
     });
   }
 
+  // Reposition on scroll/resize
+  useEffect(() => {
+    if (!open) return;
+    const update = () => calcPosition();
+    window.addEventListener('scroll', update, true);
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update, true);
+      window.removeEventListener('resize', update);
+    };
+  }, [open, calcPosition]);
+
+  const dropdown = open && typeof window !== 'undefined' ? createPortal(
+    <div
+      dir="rtl"
+      style={{ position: 'fixed', top: dropdownStyle.top, right: dropdownStyle.right, zIndex: 99999, width: 340 }}
+    >
+      <div className="bg-[#0c1526] border border-white/[0.12] rounded-2xl shadow-2xl shadow-black/70 overflow-hidden"
+        style={{ maxHeight: 'calc(100vh - 100px)' }}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/[0.07] bg-white/[0.02]">
+          <div className="flex items-center gap-2">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span className="text-sm font-bold text-white">الإشعارات</span>
+            {unread > 0 && (
+              <span className="bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">{unread > 99 ? '99+' : unread}</span>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            {unread > 0 && (
+              <button onClick={e => { e.stopPropagation(); markAll.mutate(); }}
+                className="text-[11px] text-blue-400 hover:text-blue-300 transition-colors">
+                تحديد الكل كمقروء
+              </button>
+            )}
+            <button onClick={() => setOpen(false)}
+              className="text-slate-600 hover:text-slate-300 transition-colors">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Notifications list */}
+        <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
+          {notifications.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-14 text-center px-4">
+              <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center mb-4">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#334155" strokeWidth="1.5">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+              </div>
+              <p className="text-slate-400 text-sm font-medium">لا توجد إشعارات</p>
+              <p className="text-slate-600 text-xs mt-1">ستظهر هنا عند إضافتك للوحات أو البطاقات</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-white/[0.04]">
+              {notifications.map(n => (
+                <button key={n.id} onClick={() => handleClick(n)}
+                  className={`w-full flex items-start gap-3 px-4 py-3.5 hover:bg-white/[0.04] active:bg-white/[0.07] transition-colors text-start group ${
+                    !n.is_read ? 'bg-blue-500/[0.06]' : ''
+                  }`}>
+                  {/* Type icon */}
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-base mt-0.5 ${
+                    !n.is_read ? 'bg-blue-600/20 ring-1 ring-blue-500/30' : 'bg-white/[0.05]'
+                  }`}>
+                    {TYPE_ICON[n.type] ?? '🔔'}
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-xs leading-relaxed break-words ${
+                      !n.is_read ? 'text-slate-100 font-medium' : 'text-slate-400'
+                    } group-hover:text-slate-200 transition-colors`}>
+                      {n.message}
+                    </p>
+                    {(n.board_name || n.card_title) && (
+                      <div className="flex items-center gap-1 mt-1 flex-wrap">
+                        {n.board_name && (
+                          <span className="text-[10px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded-md truncate max-w-[140px]">🏢 {n.board_name}</span>
+                        )}
+                        {n.card_title && (
+                          <span className="text-[10px] bg-slate-500/10 text-slate-400 px-1.5 py-0.5 rounded-md truncate max-w-[140px]">📋 {n.card_title}</span>
+                        )}
+                      </div>
+                    )}
+                    <p className="text-[10px] text-slate-600 mt-1">{timeAgo(n.created_at)}</p>
+                  </div>
+
+                  {/* Unread indicator */}
+                  {!n.is_read && (
+                    <div className="w-2 h-2 rounded-full bg-blue-500 mt-2 shrink-0 ring-2 ring-blue-500/30" />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body
+  ) : null;
+
   return (
     <div ref={ref} className="relative" dir="rtl">
       <button
+        ref={btnRef}
         onClick={handleOpenToggle}
         className={`relative flex items-center justify-center w-8 h-8 rounded-xl transition-all ${
           open
@@ -107,78 +225,7 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {open && (
-        <div className="absolute left-0 top-full mt-2 w-80 bg-[#0d1425] border border-white/10 rounded-2xl shadow-2xl shadow-black/60 z-[9999] overflow-hidden"
-          style={{ maxHeight: 'calc(100vh - 80px)' }}>
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.07]">
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-white">الإشعارات</h3>
-              {unread > 0 && (
-                <span className="bg-red-500/20 text-red-400 text-[10px] font-bold px-1.5 py-0.5 rounded-full">{unread}</span>
-              )}
-            </div>
-            {unread > 0 && (
-              <button
-                onClick={e => { e.stopPropagation(); markAll.mutate(); }}
-                className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
-              >
-                تحديد الكل كمقروء
-              </button>
-            )}
-          </div>
-
-          {/* List */}
-          <div className="overflow-y-auto divide-y divide-white/[0.04]" style={{ maxHeight: 'calc(100vh - 140px)' }}>
-            {notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-center">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#334155" strokeWidth="1.5">
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                </svg>
-                <p className="text-slate-600 text-sm mt-3">لا توجد إشعارات</p>
-              </div>
-            ) : (
-              notifications.map(n => (
-                <button
-                  key={n.id}
-                  onClick={() => handleClick(n)}
-                  className={`w-full flex items-start gap-3 px-4 py-3 hover:bg-white/[0.05] transition-colors text-start group ${
-                    !n.is_read ? 'bg-blue-500/[0.07]' : ''
-                  }`}
-                >
-                  {/* Icon */}
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm mt-0.5 ${
-                    !n.is_read ? 'bg-blue-500/20' : 'bg-white/[0.05]'
-                  }`}>
-                    {TYPE_ICON[n.type] ?? '🔔'}
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-xs leading-relaxed ${!n.is_read ? 'text-slate-200' : 'text-slate-400'} group-hover:text-slate-200 transition-colors`}>
-                      {n.message}
-                    </p>
-                    {(n.board_name || n.card_title) && (
-                      <p className="text-[10px] text-slate-500 mt-0.5 truncate">
-                        {n.board_name && `🏢 ${n.board_name}`}
-                        {n.board_name && n.card_title && ' · '}
-                        {n.card_title && `📋 ${n.card_title}`}
-                      </p>
-                    )}
-                    <p className="text-[10px] text-slate-600 mt-0.5">{timeAgo(n.created_at)}</p>
-                  </div>
-
-                  {/* Unread dot */}
-                  {!n.is_read && (
-                    <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
-                  )}
-                </button>
-              ))
-            )}
-          </div>
-        </div>
-      )}
+      {dropdown}
     </div>
   );
 }

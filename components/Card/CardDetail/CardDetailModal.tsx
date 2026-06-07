@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { cardsApi, boardsApi, listsApi, commentsApi, checklistsApi, usersApi } from '@/lib/api';
+import { cardsApi, boardsApi, listsApi, commentsApi, checklistsApi, usersApi, attachmentsApi } from '@/lib/api';
 import type { CardDetail } from '@/lib/types';
 import CardDueBadge from '../CardDueBadge';
 import CommentSection from './CommentSection';
@@ -646,9 +646,42 @@ export default function CardDetailModal({ cardId, boardId, onClose, onDeleted }:
                         />
                       ))}
                     </div>
+
+                    {/* Upload image cover */}
+                    <div className="border-t border-white/[0.07] pt-3 mt-1">
+                      <label className="flex items-center justify-center gap-2 w-full bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.10] hover:border-white/[0.20] text-slate-300 text-xs font-medium py-2.5 rounded-xl cursor-pointer transition-all">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        رفع صورة كغلاف
+                        <input type="file" accept="image/*" className="hidden" onChange={async e => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          if (file.size > 5 * 1024 * 1024) { toast.error('الحد الأقصى 5 MB'); return; }
+                          const toastId = toast.loading('جارٍ رفع الصورة...');
+                          try {
+                            // Upload via Worker which stores in R2
+                            const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://arid-kanban-api.info1703.workers.dev/v1';
+                            const token = typeof window !== 'undefined' ? localStorage.getItem('arid_token') : null;
+                            const form = new FormData();
+                            form.append('file', file);
+                            const res = await fetch(`${API}/cards/${cardId}/cover-image`, {
+                              method: 'POST',
+                              headers: token ? { Authorization: `Bearer ${token}` } : {},
+                              body: form,
+                            });
+                            if (!res.ok) throw new Error('فشل الرفع');
+                            const { cover_url } = await res.json() as { cover_url: string };
+                            updateMutation.mutate({ cover_color: `url(${cover_url}) center/cover no-repeat` });
+                            toast.success('تم رفع الصورة', { id: toastId });
+                          } catch {
+                            toast.error('فشل رفع الصورة', { id: toastId });
+                          }
+                        }} />
+                      </label>
+                    </div>
+
                     {card.cover_color && (
                       <button onClick={() => updateMutation.mutate({ cover_color: null })}
-                        className="w-full text-xs text-slate-400 hover:text-white bg-white/[0.05] border border-white/10 hover:border-white/20 py-2 rounded-xl transition-colors">
+                        className="w-full text-xs text-slate-400 hover:text-white bg-white/[0.05] border border-white/10 hover:border-white/20 py-2 rounded-xl transition-colors mt-2">
                         ✕ إزالة الغلاف
                       </button>
                     )}
