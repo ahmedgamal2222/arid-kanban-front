@@ -62,15 +62,33 @@ export default function NotificationBell() {
   function handleClick(n: Notification) {
     if (!n.is_read) markRead.mutate(n.id);
     setOpen(false);
-    if (n.card_id && n.board_id) {
+
+    // Navigate to workspace or board based on notification type
+    if (n.type === 'workspace_invited' && !n.board_id) {
+      router.push(`/${locale}/boards`);
+    } else if (n.board_id) {
       router.push(`/${locale}/board/${n.board_id}`);
+    } else {
+      router.push(`/${locale}/boards`);
     }
+  }
+
+  // Mark all as read when dropdown opens
+  function handleOpenToggle() {
+    setOpen(v => {
+      const next = !v;
+      if (next && unread > 0) {
+        // Delay slightly so the user sees the unread state first
+        setTimeout(() => markAll.mutate(), 1500);
+      }
+      return next;
+    });
   }
 
   return (
     <div ref={ref} className="relative" dir="rtl">
       <button
-        onClick={() => setOpen(v => !v)}
+        onClick={handleOpenToggle}
         className={`relative flex items-center justify-center w-8 h-8 rounded-xl transition-all ${
           open
             ? 'bg-blue-600/20 text-blue-400'
@@ -90,13 +108,19 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full mt-2 w-80 bg-[#0d1425] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden">
+        <div className="absolute left-0 top-full mt-2 w-80 bg-[#0d1425] border border-white/10 rounded-2xl shadow-2xl shadow-black/60 z-[9999] overflow-hidden"
+          style={{ maxHeight: 'calc(100vh - 80px)' }}>
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.07]">
-            <h3 className="text-sm font-bold text-white">الإشعارات</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-bold text-white">الإشعارات</h3>
+              {unread > 0 && (
+                <span className="bg-red-500/20 text-red-400 text-[10px] font-bold px-1.5 py-0.5 rounded-full">{unread}</span>
+              )}
+            </div>
             {unread > 0 && (
               <button
-                onClick={() => markAll.mutate()}
+                onClick={e => { e.stopPropagation(); markAll.mutate(); }}
                 className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
               >
                 تحديد الكل كمقروء
@@ -105,7 +129,7 @@ export default function NotificationBell() {
           </div>
 
           {/* List */}
-          <div className="max-h-[380px] overflow-y-auto divide-y divide-white/[0.04]">
+          <div className="overflow-y-auto divide-y divide-white/[0.04]" style={{ maxHeight: 'calc(100vh - 140px)' }}>
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-center">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#334155" strokeWidth="1.5">
@@ -119,31 +143,35 @@ export default function NotificationBell() {
                 <button
                   key={n.id}
                   onClick={() => handleClick(n)}
-                  className={`w-full flex items-start gap-3 px-4 py-3 hover:bg-white/[0.04] transition-colors text-start ${
-                    !n.is_read ? 'bg-blue-500/[0.06]' : ''
+                  className={`w-full flex items-start gap-3 px-4 py-3 hover:bg-white/[0.05] transition-colors text-start group ${
+                    !n.is_read ? 'bg-blue-500/[0.07]' : ''
                   }`}
                 >
                   {/* Icon */}
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-base ${
-                    !n.is_read ? 'bg-blue-500/20' : 'bg-white/[0.06]'
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm mt-0.5 ${
+                    !n.is_read ? 'bg-blue-500/20' : 'bg-white/[0.05]'
                   }`}>
                     {TYPE_ICON[n.type] ?? '🔔'}
                   </div>
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <p className={`text-xs leading-relaxed ${!n.is_read ? 'text-slate-200' : 'text-slate-400'}`}>
+                    <p className={`text-xs leading-relaxed ${!n.is_read ? 'text-slate-200' : 'text-slate-400'} group-hover:text-slate-200 transition-colors`}>
                       {n.message}
                     </p>
-                    {n.card_title && (
-                      <p className="text-[10px] text-slate-600 mt-0.5 truncate">📋 {n.card_title}</p>
+                    {(n.board_name || n.card_title) && (
+                      <p className="text-[10px] text-slate-500 mt-0.5 truncate">
+                        {n.board_name && `🏢 ${n.board_name}`}
+                        {n.board_name && n.card_title && ' · '}
+                        {n.card_title && `📋 ${n.card_title}`}
+                      </p>
                     )}
                     <p className="text-[10px] text-slate-600 mt-0.5">{timeAgo(n.created_at)}</p>
                   </div>
 
                   {/* Unread dot */}
                   {!n.is_read && (
-                    <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 shrink-0" />
+                    <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
                   )}
                 </button>
               ))
