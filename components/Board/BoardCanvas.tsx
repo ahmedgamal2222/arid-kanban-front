@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -27,9 +27,18 @@ interface Props {
 export default function BoardCanvas({ board }: Props) {
   const [lists, setLists] = useState<ListFull[]>(board.lists);
   const [activeCard, setActiveCard] = useState<CardSummary | null>(null);
-  const originalListRef = useRef<string | null>(null); // original list at drag start
-  const currentListRef  = useRef<string | null>(null); // current list as card moves
+  const originalListRef = useRef<string | null>(null);
+  const currentListRef  = useRef<string | null>(null);
+  const isDragging      = useRef(false);
   const qc = useQueryClient();
+
+  // Sync local lists state whenever the board query refreshes (after invalidation)
+  // Skip sync while a drag is in progress to avoid visual glitches
+  useEffect(() => {
+    if (!isDragging.current) {
+      setLists(board.lists);
+    }
+  }, [board.lists]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -39,6 +48,7 @@ export default function BoardCanvas({ board }: Props) {
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     const { active } = event;
+    isDragging.current = true;
     if (active.data.current?.type === 'card') {
       setActiveCard(active.data.current.card as CardSummary);
       originalListRef.current = active.data.current.listId as string;
@@ -85,6 +95,7 @@ export default function BoardCanvas({ board }: Props) {
   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveCard(null);
+    isDragging.current = false;
     if (!over) {
       setLists(board.lists);
       originalListRef.current = null;
