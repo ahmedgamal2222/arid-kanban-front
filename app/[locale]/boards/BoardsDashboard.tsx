@@ -246,7 +246,8 @@ function WorkspaceMembersModal({ workspace, onClose }: { workspace: Workspace; o
   );
 }
 
-// ── Board colors palette ──const BOARD_COLORS = [
+// ── Board colors palette ──
+const BOARD_COLORS = [
   'linear-gradient(135deg,#2563eb,#4338ca)',
   'linear-gradient(135deg,#7c3aed,#7e22ce)',
   'linear-gradient(135deg,#059669,#0f766e)',
