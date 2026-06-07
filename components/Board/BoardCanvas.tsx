@@ -27,7 +27,8 @@ interface Props {
 export default function BoardCanvas({ board }: Props) {
   const [lists, setLists] = useState<ListFull[]>(board.lists);
   const [activeCard, setActiveCard] = useState<CardSummary | null>(null);
-  const originalListRef = useRef<string | null>(null); // tracks the ORIGINAL list before any drag-over
+  const originalListRef = useRef<string | null>(null); // original list at drag start
+  const currentListRef  = useRef<string | null>(null); // current list as card moves
   const qc = useQueryClient();
 
   const sensors = useSensors(
@@ -41,6 +42,7 @@ export default function BoardCanvas({ board }: Props) {
     if (active.data.current?.type === 'card') {
       setActiveCard(active.data.current.card as CardSummary);
       originalListRef.current = active.data.current.listId as string;
+      currentListRef.current  = active.data.current.listId as string;
     }
   }, []);
 
@@ -49,17 +51,20 @@ export default function BoardCanvas({ board }: Props) {
     if (!over) return;
 
     const activeId = active.id as string;
-    const overId = over.id as string;
-
-    const activeType = active.data.current?.type;
     const overType = over.data.current?.type;
 
-    if (activeType !== 'card') return;
+    if (active.data.current?.type !== 'card') return;
 
-    const fromListId = active.data.current?.listId as string;
-    const toListId = overType === 'list' ? overId : (over.data.current?.listId as string);
+    // Use currentListRef — not active.data which stays frozen at drag start
+    const fromListId = currentListRef.current as string;
+    const toListId = overType === 'list'
+      ? (over.id as string)
+      : (over.data.current?.listId as string);
 
     if (!fromListId || !toListId || fromListId === toListId) return;
+
+    // Update current position
+    currentListRef.current = toListId;
 
     setLists(prev => {
       const fromList = prev.find(l => l.id === fromListId);
@@ -81,24 +86,22 @@ export default function BoardCanvas({ board }: Props) {
     const { active, over } = event;
     setActiveCard(null);
     if (!over) {
-      // Cancelled — revert
       setLists(board.lists);
       originalListRef.current = null;
+      currentListRef.current  = null;
       return;
     }
 
     const activeType = active.data.current?.type;
 
     if (activeType === 'card') {
-      const cardId = active.id as string;
-      const fromListId = originalListRef.current as string; // original list, not the mutated one
+      const cardId     = active.id as string;
+      const fromListId = originalListRef.current as string;
+      const toListId   = currentListRef.current as string; // where card ended up
       originalListRef.current = null;
+      currentListRef.current  = null;
 
-      const toListId = over.data.current?.type === 'list'
-        ? (over.id as string)
-        : (over.data.current?.listId as string);
-
-      if (!toListId) { setLists(board.lists); return; }
+      if (!toListId || !fromListId) { setLists(board.lists); return; }
 
       // Same-list reorder
       if (fromListId === toListId) {
@@ -128,28 +131,23 @@ export default function BoardCanvas({ board }: Props) {
         return;
       }
 
-      // Cross-list move — handleDragOver already moved the card in local state
+      // Cross-list move — local state already updated by handleDragOver
       const toList = lists.find(l => l.id === toListId);
       if (!toList) { setLists(board.lists); return; }
 
-      const idx = toList.cards.findIndex(c => c.id === cardId);
+      const idx    = toList.cards.findIndex(c => c.id === cardId);
       const before = toList.cards[idx - 1]?.position ?? null;
       const after  = toList.cards[idx + 1]?.position ?? null;
-
       const newPos = before != null && after != null
         ? (before + after) / 2
-        : before != null
-          ? before + 1
-          : after != null
-            ? after / 2
-            : 0.5;
+        : before != null ? before + 1
+        : after != null  ? after / 2
+        : 0.5;
 
       try {
         await cardsApi.update(cardId, { list_id: toListId, position: newPos });
         qc.invalidateQueries({ queryKey: ['board', board.id] });
-      } catch {
-        setLists(board.lists);
-      }
+      } catch { setLists(board.lists); }
     }
 
     if (activeType === 'list') {

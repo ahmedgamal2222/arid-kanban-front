@@ -17,8 +17,16 @@ interface Props {
 }
 
 const COVER_COLORS = [
+  'linear-gradient(135deg,#1d4ed8,#4338ca)',
+  'linear-gradient(135deg,#7c3aed,#6d28d9)',
+  'linear-gradient(135deg,#059669,#0f766e)',
+  'linear-gradient(135deg,#d97706,#b45309)',
+  'linear-gradient(135deg,#dc2626,#b91c1c)',
+  'linear-gradient(135deg,#0891b2,#0369a1)',
+  'linear-gradient(135deg,#be185d,#9d174d)',
+  'linear-gradient(135deg,#4f46e5,#7c3aed)',
   '#1d4ed8', '#7c3aed', '#059669', '#d97706', '#dc2626',
-  '#0891b2', '#be185d', '#4f46e5', '#065f46', '#92400e',
+  '#0891b2', '#be185d', '#065f46', '#92400e',
   null,
 ];
 
@@ -244,21 +252,37 @@ function MoveCardPanel({ card, boardId, onMoved }: { card: any; boardId: string;
 
   return (
     <div className="space-y-3">
-      <select
-        value={selectedList}
-        onChange={e => setSelectedList(e.target.value)}
-        className="w-full bg-white/[0.05] border border-white/10 focus:border-blue-500/50 focus:outline-none text-white rounded-lg px-3 py-2 text-xs"
-      >
-        {lists.map((l: any) => (
-          <option key={l.id} value={l.id}>{l.name}{l.id === card.list_id ? ' (الحالية)' : ''}</option>
-        ))}
-      </select>
+      <div>
+        <label className="text-[10px] text-slate-500 block mb-1.5">اختر القائمة</label>
+        <div className="space-y-1.5">
+          {lists.map((l: any) => (
+            <button
+              key={l.id}
+              onClick={() => setSelectedList(l.id)}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl border text-sm transition-all ${
+                selectedList === l.id
+                  ? 'bg-blue-600/20 border-blue-500/50 text-blue-300'
+                  : 'bg-white/[0.03] border-white/[0.08] text-slate-300 hover:bg-white/[0.07] hover:border-white/[0.14]'
+              }`}
+            >
+              <span className="truncate">{l.name}</span>
+              {l.id === card.list_id && <span className="text-[10px] text-slate-500 shrink-0 ms-2">الحالية</span>}
+              {selectedList === l.id && l.id !== card.list_id && <span className="text-[10px] text-blue-400 shrink-0 ms-2">✓</span>}
+            </button>
+          ))}
+        </div>
+      </div>
       <button
         onClick={handleMove}
         disabled={moving || selectedList === card.list_id}
-        className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-semibold py-2 rounded-lg transition-colors"
+        className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold py-2.5 rounded-xl transition-colors"
       >
-        {moving ? 'جارٍ النقل...' : 'نقل البطاقة'}
+        {moving ? (
+          <span className="flex items-center justify-center gap-2">
+            <svg className="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+            جارٍ النقل...
+          </span>
+        ) : 'نقل البطاقة ↗️'}
       </button>
     </div>
   );
@@ -613,15 +637,21 @@ export default function CardDetailModal({ cardId, boardId, onClose, onDeleted }:
                 {activePanel === 'cover' && (
                   <>
                     <h4 className="text-xs font-semibold text-slate-400 mb-3">لون الغلاف</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {COVER_COLORS.map((color, i) => (
+                    <div className="grid grid-cols-6 gap-2 mb-3">
+                      {COVER_COLORS.filter(Boolean).map((color, i) => (
                         <button key={i} onClick={() => updateMutation.mutate({ cover_color: color })}
-                          className={`w-8 h-8 rounded-lg border transition-all ${color === card.cover_color ? 'ring-2 ring-white ring-offset-2 ring-offset-[#0f172a]' : 'border-white/10 hover:scale-110'}`}
-                          style={{ background: color ?? 'transparent' }}>
-                          {!color && <span className="text-slate-500 text-xs">✕</span>}
-                        </button>
+                          className={`h-10 rounded-xl border-2 transition-all hover:scale-105 ${color === card.cover_color ? 'border-white shadow-lg' : 'border-transparent hover:border-white/40'}`}
+                          style={{ background: color ?? 'transparent' }}
+                          title={String(color)}
+                        />
                       ))}
                     </div>
+                    {card.cover_color && (
+                      <button onClick={() => updateMutation.mutate({ cover_color: null })}
+                        className="w-full text-xs text-slate-400 hover:text-white bg-white/[0.05] border border-white/10 hover:border-white/20 py-2 rounded-xl transition-colors">
+                        ✕ إزالة الغلاف
+                      </button>
+                    )}
                   </>
                 )}
 
