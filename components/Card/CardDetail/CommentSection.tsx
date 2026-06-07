@@ -29,8 +29,8 @@ export default function CommentSection({ comments, cardId, boardId }: Props) {
 
   return (
     <div>
-      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-3 flex items-center gap-2">
-        💬 التعليقات {comments.length > 0 && <span className="bg-gray-200 dark:bg-gray-600 rounded-full text-xs px-2">{comments.length}</span>}
+      <h3 className="text-xs font-semibold text-slate-500 mb-3 flex items-center gap-2">
+        💬 التعليقات {comments.length > 0 && <span className="bg-white/[0.08] text-slate-400 rounded-full text-[10px] px-2 py-0.5">{comments.length}</span>}
       </h3>
 
       {/* قائمة التعليقات */}
@@ -48,8 +48,8 @@ export default function CommentSection({ comments, cardId, boardId }: Props) {
             rows={2}
             value={body}
             onChange={e => setBody(e.target.value)}
-            placeholder="اكتب تعليقاً... (يدعم Markdown)"
-            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm outline-none focus:border-blue-500 resize-none dark:text-white"
+            placeholder="اكتب تعليقاً..."
+            className="w-full rounded-xl border border-white/[0.10] bg-white/[0.06] hover:border-white/[0.18] focus:border-blue-500/60 focus:bg-white/[0.08] focus:outline-none px-3 py-2 text-sm text-white placeholder-slate-500 resize-none transition-all"
           />
           {body.trim() && (
             <button
@@ -91,13 +91,13 @@ function CommentItem({ comment, cardId }: { comment: Comment; cardId: string }) 
       </div>
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+          <span className="text-xs font-semibold text-slate-300">
             {comment.arid_researcher_id}
           </span>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-slate-500">
             {formatDistanceToNow(new Date(comment.created_at * 1000), { addSuffix: true, locale: ar })}
           </span>
-          {!!comment.is_edited && <span className="text-xs text-gray-400">(معدَّل)</span>}
+          {!!comment.is_edited && <span className="text-xs text-slate-600">(معدَّل)</span>}
         </div>
 
         {editing ? (
@@ -107,27 +107,27 @@ function CommentItem({ comment, cardId }: { comment: Comment; cardId: string }) 
               rows={3}
               value={body}
               onChange={e => setBody(e.target.value)}
-              className="w-full rounded-lg border border-blue-400 bg-white dark:bg-gray-700 px-3 py-2 text-sm outline-none resize-none dark:text-white"
+              className="w-full rounded-xl border border-blue-500/60 bg-white/[0.06] focus:outline-none px-3 py-2 text-sm text-white resize-none"
             />
             <div className="flex gap-2 mt-1.5">
               <button
                 onClick={() => updateMutation.mutate()}
                 disabled={updateMutation.isPending}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded-lg"
+                className="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg transition-colors"
               >
                 حفظ
               </button>
-              <button onClick={() => setEditing(false)} className="text-gray-500 text-xs">إلغاء</button>
+              <button onClick={() => setEditing(false)} className="text-slate-500 hover:text-slate-300 text-xs transition-colors">إلغاء</button>
             </div>
           </div>
         ) : (
-          <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{comment.body}</p>
+          <p className="text-sm text-slate-300 whitespace-pre-wrap">{comment.body}</p>
         )}
 
         {!editing && (
           <div className="flex gap-3 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button onClick={() => { setBody(comment.body); setEditing(true); }} className="text-xs text-gray-400 hover:text-gray-600">تعديل</button>
-            <button onClick={() => deleteMutation.mutate()} className="text-xs text-red-400 hover:text-red-600">حذف</button>
+            <button onClick={() => { setBody(comment.body); setEditing(true); }} className="text-xs text-slate-500 hover:text-slate-300 transition-colors">تعديل</button>
+            <button onClick={() => deleteMutation.mutate()} className="text-xs text-red-500 hover:text-red-400 transition-colors">حذف</button>
           </div>
         )}
       </div>
