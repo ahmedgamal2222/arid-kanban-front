@@ -80,9 +80,13 @@ export default function NotificationBell() {
   const calcPosition = useCallback(() => {
     if (!btnRef.current) return;
     const rect = btnRef.current.getBoundingClientRect();
+    const dropdownWidth = 340;
+    // Align dropdown so right edge aligns with button right edge, but don't go off screen
+    const rightFromViewport = window.innerWidth - rect.right;
+    const clampedRight = Math.max(8, Math.min(rightFromViewport, window.innerWidth - dropdownWidth - 8));
     setDropdownStyle({
       top: rect.bottom + 8,
-      right: Math.max(8, window.innerWidth - rect.right - 4),
+      right: clampedRight,
     });
   }, []);
 
@@ -111,15 +115,30 @@ export default function NotificationBell() {
   }, [open, calcPosition]);
 
   const dropdown = open && typeof window !== 'undefined' ? createPortal(
-    <div
-      dir="rtl"
-      style={{ position: 'fixed', top: dropdownStyle.top, right: dropdownStyle.right, zIndex: 99999, width: 340 }}
-    >
-      <div className="bg-[#0c1526] border border-white/[0.12] rounded-2xl shadow-2xl shadow-black/70 overflow-hidden"
-        style={{ maxHeight: 'calc(100vh - 100px)' }}>
+    <>
+      {/* Backdrop to close on outside click */}
+      <div
+        style={{ position: 'fixed', inset: 0, zIndex: 99998 }}
+        onClick={() => setOpen(false)}
+      />
+      <div
+        dir="rtl"
+        style={{
+          position: 'fixed',
+          top: dropdownStyle.top,
+          right: dropdownStyle.right,
+          zIndex: 99999,
+          width: 340,
+          maxWidth: 'calc(100vw - 16px)',
+        }}
+      >
+        <div
+          className="bg-[#0c1526] border border-white/[0.12] rounded-2xl shadow-2xl shadow-black/70 flex flex-col"
+          style={{ maxHeight: 'min(520px, calc(100vh - 80px))' }}
+        >
 
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/[0.07] bg-white/[0.02]">
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/[0.07] bg-white/[0.02] flex-shrink-0 rounded-t-2xl">
           <div className="flex items-center gap-2">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             <span className="text-sm font-bold text-white">الإشعارات</span>
@@ -141,8 +160,8 @@ export default function NotificationBell() {
           </div>
         </div>
 
-        {/* Notifications list */}
-        <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
+        {/* Notifications list - scrollable */}
+        <div className="overflow-y-auto flex-1" style={{ overscrollBehavior: 'contain' }}>
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-14 text-center px-4">
               <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center mb-4">
@@ -198,7 +217,7 @@ export default function NotificationBell() {
           )}
         </div>
       </div>
-    </div>,
+    </>,
     document.body
   ) : null;
 
