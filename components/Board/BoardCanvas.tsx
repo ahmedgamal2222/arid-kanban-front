@@ -27,6 +27,7 @@ interface Props {
 export default function BoardCanvas({ board }: Props) {
   const [lists, setLists] = useState<ListFull[]>(board.lists);
   const [activeCard, setActiveCard] = useState<CardSummary | null>(null);
+  const originalListRef = useRef<string | null>(null); // tracks the ORIGINAL list before any drag-over
   const qc = useQueryClient();
 
   const sensors = useSensors(
@@ -39,6 +40,7 @@ export default function BoardCanvas({ board }: Props) {
     const { active } = event;
     if (active.data.current?.type === 'card') {
       setActiveCard(active.data.current.card as CardSummary);
+      originalListRef.current = active.data.current.listId as string;
     }
   }, []);
 
@@ -78,20 +80,27 @@ export default function BoardCanvas({ board }: Props) {
   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveCard(null);
-    if (!over) return;
+    if (!over) {
+      // Cancelled — revert
+      setLists(board.lists);
+      originalListRef.current = null;
+      return;
+    }
 
     const activeType = active.data.current?.type;
 
     if (activeType === 'card') {
       const cardId = active.id as string;
-      const fromListId = active.data.current?.listId as string;
+      const fromListId = originalListRef.current as string; // original list, not the mutated one
+      originalListRef.current = null;
+
       const toListId = over.data.current?.type === 'list'
         ? (over.id as string)
         : (over.data.current?.listId as string);
 
-      if (!toListId) return;
+      if (!toListId) { setLists(board.lists); return; }
 
-      // Same-list reorder: use arrayMove to update local state
+      // Same-list reorder
       if (fromListId === toListId) {
         const list = lists.find(l => l.id === toListId);
         if (!list) return;
@@ -119,9 +128,9 @@ export default function BoardCanvas({ board }: Props) {
         return;
       }
 
-      // Cross-list move: position already updated by handleDragOver
+      // Cross-list move — handleDragOver already moved the card in local state
       const toList = lists.find(l => l.id === toListId);
-      if (!toList) return;
+      if (!toList) { setLists(board.lists); return; }
 
       const idx = toList.cards.findIndex(c => c.id === cardId);
       const before = toList.cards[idx - 1]?.position ?? null;
