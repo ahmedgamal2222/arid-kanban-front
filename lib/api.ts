@@ -246,3 +246,53 @@ export const attachmentsApi = {
   delete: (id: string) =>
     apiFetch<{ success: boolean }>(`/attachments/${id}`, { method: 'DELETE' }),
 };
+
+// ── Mind Maps ──
+export const mindMapsApi = {
+  list: (boardId: string) =>
+    apiFetch<{ mind_maps: any[] }>(`/boards/${boardId}/mind-maps`),
+  create: (boardId: string, data: { title: string; description?: string }) =>
+    apiFetch<{ mind_map: any }>(`/boards/${boardId}/mind-maps`, { method: 'POST', body: JSON.stringify(data) }),
+  get: (id: string) =>
+    apiFetch<{ mind_map: any }>(`/mind-maps/${id}`),
+  update: (id: string, data: { title?: string; description?: string }) =>
+    apiFetch<{ success: boolean }>(`/mind-maps/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id: string) =>
+    apiFetch<{ success: boolean }>(`/mind-maps/${id}`, { method: 'DELETE' }),
+  createNode: (mapId: string, data: any) =>
+    apiFetch<{ node: any }>(`/mind-maps/${mapId}/nodes`, { method: 'POST', body: JSON.stringify(data) }),
+  updateNode: (nodeId: string, data: any) =>
+    apiFetch<{ success: boolean }>(`/mind-map-nodes/${nodeId}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteNode: (nodeId: string) =>
+    apiFetch<{ success: boolean }>(`/mind-map-nodes/${nodeId}`, { method: 'DELETE' }),
+  createEdge: (mapId: string, data: any) =>
+    apiFetch<{ success: boolean; id: string }>(`/mind-maps/${mapId}/edges`, { method: 'POST', body: JSON.stringify(data) }),
+  deleteEdge: (edgeId: string) =>
+    apiFetch<{ success: boolean }>(`/mind-map-edges/${edgeId}`, { method: 'DELETE' }),
+  bulkUpdate: (mapId: string, nodes: { id: string; x: number; y: number }[]) =>
+    apiFetch<{ success: boolean }>(`/mind-maps/${mapId}/bulk-update`, { method: 'POST', body: JSON.stringify({ nodes }) }),
+};
+
+// ── References ──
+export const referencesApi = {
+  list: (wsId: string, q = '', type = '') =>
+    apiFetch<{ references: any[] }>(`/workspaces/${wsId}/references?q=${encodeURIComponent(q)}&type=${encodeURIComponent(type)}`),
+  create: (wsId: string, data: any) =>
+    apiFetch<{ reference: any }>(`/workspaces/${wsId}/references`, { method: 'POST', body: JSON.stringify(data) }),
+  get: (id: string) =>
+    apiFetch<{ reference: any }>(`/references/${id}`),
+  update: (id: string, data: any) =>
+    apiFetch<{ success: boolean }>(`/references/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id: string) =>
+    apiFetch<{ success: boolean }>(`/references/${id}`, { method: 'DELETE' }),
+  importBibtex: (wsId: string, bibtex: string) =>
+    apiFetch<{ success: boolean; imported: number }>(`/references/import-bibtex`, {
+      method: 'POST', body: JSON.stringify({ workspace_id: wsId, bibtex }),
+    }),
+  cardRefs: (cardId: string) =>
+    apiFetch<{ references: any[] }>(`/cards/${cardId}/references`),
+  addToCard: (cardId: string, refId: string) =>
+    apiFetch<{ success: boolean }>(`/cards/${cardId}/references`, { method: 'POST', body: JSON.stringify({ reference_id: refId }) }),
+  removeFromCard: (cardId: string, refId: string) =>
+    apiFetch<{ success: boolean }>(`/cards/${cardId}/references/${refId}`, { method: 'DELETE' }),
+};

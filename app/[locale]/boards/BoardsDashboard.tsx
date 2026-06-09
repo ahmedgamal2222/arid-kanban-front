@@ -384,6 +384,10 @@ export default function BoardsDashboard() {
               </div>
             )}
             <NotificationBell />
+            <Link href={`/${locale}/references`}
+              className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400 hover:text-white hover:bg-white/[0.06] border border-white/[0.06] hover:border-white/[0.12] px-3 py-2 rounded-xl transition-all">
+              📚 المراجع
+            </Link>
             <button
               onClick={logout}
               className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 hover:bg-white/[0.05] border border-transparent hover:border-white/[0.07] px-3 py-2 rounded-xl transition-all"

@@ -435,7 +435,11 @@ export default function BoardHeader({ board }: Props) {
         الجدول الزمني
       </Link>
 
-      {/* Settings button */}
+      {/* Mind Map link */}
+      <Link href={`/${locale}/board/${board.id}/mindmap`}
+        className="hidden sm:flex items-center gap-1.5 text-xs text-white/60 hover:text-white hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/[0.14] rounded-lg px-3 py-1.5 transition-all">
+        🧠 خريطة ذهنية
+      </Link>
       <div className="relative shrink-0">
         <button
           onClick={() => setSettingsOpen(v => !v)}
