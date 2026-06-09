@@ -137,14 +137,29 @@ function AddReferenceModal({ wsId, onClose, onAdded }: { wsId: string; onClose: 
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs text-slate-400 block mb-1">نوع المرجع</label>
-                    <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
-                      className={inp + ' [color-scheme:dark]'}>
-                      {REF_TYPES.map(t => <option key={t.id} value={t.id}>{t.icon} {t.label}</option>)}
-                    </select>
+                {/* Type selector - full width */}
+                <div>
+                  <label className="text-xs text-slate-400 block mb-2">نوع المرجع</label>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {REF_TYPES.map(t => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, type: t.id }))}
+                        className={`flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl border text-center transition-all ${
+                          form.type === t.id
+                            ? 'bg-blue-600/25 border-blue-500/60 text-blue-200 shadow-sm'
+                            : 'bg-white/[0.04] border-white/[0.08] text-slate-400 hover:bg-white/[0.08] hover:text-slate-200 hover:border-white/[0.16]'
+                        }`}
+                      >
+                        <span className="text-lg leading-none">{t.icon}</span>
+                        <span className="text-[10px] font-medium leading-tight">{t.label}</span>
+                      </button>
+                    ))}
                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs text-slate-400 block mb-1">DOI <span className="text-slate-600">(اختياري)</span></label>
                     <div className="flex gap-2">
